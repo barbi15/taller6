@@ -18,7 +18,7 @@
 </template>
 
 <script>
-import { login } from '../auth'; // Asegúrate de que auth.js tiene la función de login
+import { login } from '../auth'; // Importar la función de login desde el archivo auth.js
 
 export default {
   data() {
@@ -30,31 +30,81 @@ export default {
   },
   methods: {
     async handleLogin() {
+      // Llamar a la función de login para autenticar al usuario
       const response = await login({
         nombre_usuario: this.username,
         contrasena: this.password,
       });
 
       if (response.success) {
+        // Si el inicio de sesión es exitoso, obtener la información del usuario
         const token = response.data.token;
         const userId = response.data.id; // Obtener el ID del usuario
-        const rol = response.data.rol; // Obtén el rol si lo tienes definido
-        console.log("ID de usuario:", userId);
-        // Almacena en localStorage el ID del usuario y el token
+
+        // Almacenar el ID del usuario y el token en el localStorage
         localStorage.setItem('token', token);
         localStorage.setItem('userId', userId);
-        localStorage.setItem('rol', rol);
 
-        // Redirigir según el ID del usuario
+        // Redirigir siempre a la pantalla del administrador (AdminHome)
+        this.$router.push('/adminhome');
+
+        // Código comentado para redirigir a la pantalla del cocinero
+        /*
         if (userId === 1) {
           this.$router.push('/adminhome'); // Si el ID es 1, es administrador
         } else {
           this.$router.push('/cocinero'); // Si no, redirigir a la vista del cocinero
         }
+        */
       } else {
+        // Mostrar mensaje de error si el inicio de sesión falla
         this.errorMessage = `Error en el inicio de sesión: ${response.message} (Código: ${response.statusCode})`;
       }
     },
   },
 };
 </script>
+
+<style scoped>
+/* Estilos personalizados para la pantalla de login */
+.login-container {
+  width: 300px;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+}
+
+.input-group {
+  margin-bottom: 15px;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+button[type="submit"] {
+  width: 100%;
+  padding: 10px;
+  background-color: #3498db;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+button[type="submit"]:hover {
+  background-color: #2980b9;
+}
+
+.error {
+  color: red;
+  margin-top: 10px;
+}
+</style>
