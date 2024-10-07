@@ -1,4 +1,5 @@
 <template>
+  <link rel="stylesheet" href="styles/estilo1nar.css">
   <div class="login-container">
     <h1>Iniciar Sesión</h1>
     <form @submit.prevent="handleLogin">
@@ -18,6 +19,7 @@
 </template>
 
 <script>
+import '../styles/estilo1nar.css';
 import { login } from '../auth'; // Importar la función de login desde el archivo auth.js
 
 export default {
@@ -64,47 +66,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-/* Estilos personalizados para la pantalla de login */
-.login-container {
-  width: 300px;
-  margin: auto;
-  padding: 20px;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-}
-
-.input-group {
-  margin-bottom: 15px;
-}
-
-.input-group label {
-  display: block;
-  margin-bottom: 5px;
-}
-
-.input-group input {
-  width: 100%;
-  padding: 8px;
-  box-sizing: border-box;
-}
-
-button[type="submit"] {
-  width: 100%;
-  padding: 10px;
-  background-color: #3498db;
-  border: none;
-  color: white;
-  cursor: pointer;
-}
-
-button[type="submit"]:hover {
-  background-color: #2980b9;
-}
-
-.error {
-  color: red;
-  margin-top: 10px;
-}
-</style>

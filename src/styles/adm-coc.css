@@ -1,0 +1,60 @@
+
+/* Estilos para pantalla admin y cocinero*/
+.cocinero-home {
+  max-width: 900px;
+  margin: 20px auto;
+  padding: 20px;
+  text-align: center;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.comandas-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.comandas-table th,
+.comandas-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+.comandas-table th {
+  background-color: #f2f2f2;
+}
+
+.comandas-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.comandas-table tr:hover {
+  background-color: #f1f1f1;
+}
+
+select {
+  padding: 5px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+button {
+  background-color: #42b983;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #38a169;
+}
+
+.error {
+  color: red;
+  margin-top: 20px;
+}

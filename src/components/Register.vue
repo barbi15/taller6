@@ -24,6 +24,7 @@
 </template>
 
 <script>
+import '../styles/estilo1nar.css';
 // Importar la función de registro desde auth.js
 import { register } from '../auth';
 
@@ -61,49 +62,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.register-container {
-  max-width: 500px;
-  margin: 0 auto;
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  background-color: #f9f9f9;
-}
-
-.form-group {
-  margin-bottom: 15px;
-}
-
-button {
-  background-color: #42b983;
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  cursor: pointer;
-  border-radius: 4px;
-}
-
-button:hover {
-  background-color: #38a169;
-}
-
-select, input {
-  width: 100%;
-  padding: 10px;
-  margin-top: 5px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
-
-.error {
-  color: red;
-  margin-top: 15px;
-}
-
-.success {
-  color: green;
-  margin-top: 15px;
-}
-</style>
