@@ -2,85 +2,100 @@
   <div class="admin-home-container">
     <h1 class="title">Pantalla de inicio del administrador</h1>
 
-    <!-- Botón para Gestor de Comandas -->
-    <button class="gestor-comandas-button" @click="irAGestorDeComandas">Gestor de Comandas</button>
-
-    <!-- Buscador de productos -->
-    <div class="search-bar">
-      <input v-model="searchQuery" placeholder="Buscar producto..." />
-    </div>
-
-    <!-- Lista de Productos con buscador -->
-    <h2 class="subtitle">Productos</h2>
-    <ul class="product-list">
-      <li v-for="product in filteredProducts" :key="product.id" class="product-item">
-        {{ product.nombre }} - ${{ product.precio }} (Stock: {{ product.stock }})
-        <button @click="addToOrder(product)" class="add-to-order-button">Añadir a Comanda</button>
-      </li>
-    </ul>
-
-    <!-- Vista de la Comanda -->
-    <div class="comanda-container">
-      <h2>Comanda Actual</h2>
-      <table class="comanda-table">
-        <thead>
-          <tr>
-            <th>Producto</th>
-            <th>Precio</th>
-            <th>Cantidad</th>
-            <th>Total</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="item in currentOrder" :key="item.id">
-            <td>{{ item.nombre }}</td>
-            <td>{{ item.precio }}</td>
-            <td>{{ item.cantidad }}</td>
-            <td>{{ (item.precio * item.cantidad).toFixed(2) }}</td>
-            <td>
-              <button @click="removeFromOrder(item)" class="remove-item-button">Eliminar</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <button @click="confirmOrder" class="confirm-order-button">Confirmar Comanda</button>
-    </div>
-
-    <!-- Estado de las Comandas -->
-    <div class="order-status-container">
-      <h2>Estado de las Comandas</h2>
-      <ul>
-        <li v-for="order in activeOrders" :key="order.id">
-          {{ order.producto }} - Cantidad: {{ order.cantidad }} - Estado: {{ order.estado }}
-        </li>
-      </ul>
+    <!-- Botones de navegación -->
+    <div class="nav-buttons">
+      <button class="gestor-comandas-button" @click="irAGestorDeComandas">Gestor de Comandas</button>
+      <button class="dollar-button" @click="getDollarPrice">Cotización del Dólar</button>
     </div>
 
     <!-- Cotización del dólar -->
-    <div class="dollar-price-container">
-      <button @click="getDollarPrice" class="dollar-button">Cotización del Dólar</button>
-      <p v-if="dollarPrice">Cotización actual: ${{ dollarPrice }}</p>
+    <div v-if="dollarPrice" class="dollar-price">
+      <p>Cotización actual del dólar: ${{ dollarPrice }}</p>
     </div>
 
-    <Comandas />
+    <!-- Contenedor principal que divide la pantalla en dos -->
+    <div class="main-content">
+      <!-- Columna izquierda: búsqueda y productos -->
+      <div class="left-panel">
+        <!-- Buscador de productos -->
+        <div class="search-bar">
+          <input v-model="searchQuery" placeholder="Buscar producto..." />
+        </div>
+
+        <!-- Tabla de productos -->
+        <table class="product-table">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Precio</th>
+              <th>Cantidad</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="product in filteredProducts" :key="product.id">
+              <td>{{ product.nombre }}</td>
+              <td>{{ product.precio }}</td>
+              <td>{{ product.stock }}</td>
+              <td>
+                <button @click="addToOrder(product)" class="add-to-order-button">+</button>
+                <button @click="removeFromOrder(product)" class="remove-from-order-button">-</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Columna derecha: comanda actual -->
+      <div class="right-panel">
+        <h2>Comanda Actual</h2>
+        <table class="comanda-table">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Precio</th>
+              <th>Cantidad</th>
+              <th>Total</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in currentOrder" :key="item.id">
+              <td>{{ item.nombre }}</td>
+              <td>{{ item.precio }}</td>
+              <td>{{ item.cantidad }}</td>
+              <td>{{ (item.precio * item.cantidad).toFixed(2) }}</td>
+              <td>
+                <button @click="removeFromOrder(item)" class="remove-item-button">Eliminar</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <button @click="confirmOrder" class="confirm-order-button">Confirmar Comanda</button>
+
+        <!-- Estado de las Comandas -->
+        <div class="order-status-container">
+          <h2>Estado de las Comandas</h2>
+          <ul>
+            <li v-for="order in activeOrders" :key="order.id">
+              {{ order.producto }} - Cantidad: {{ order.cantidad }} - Estado: {{ order.estado }}
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
-import '../styles/adm-coc.css';
-import axios from 'axios';
-import Comandas from '../components/Comandas.vue'; // Ajusta la ruta según sea necesario
-
 export default {
-  components: { Comandas },
   data() {
     return {
       products: [],
-      currentOrder: [], // Productos agregados a la comanda actual
-      searchQuery: '', // Valor de búsqueda
-      activeOrders: [], // Comandas activas
-      dollarPrice: null, // Cotización del dólar
+      currentOrder: [],
+      searchQuery: '',
+      activeOrders: [],
+      dollarPrice: null,
     };
   },
   computed: {
@@ -95,19 +110,19 @@ export default {
     this.getActiveOrders();
   },
   methods: {
-    // Método para obtener productos del backend
-    getProducts() {
-      axios
-        .get('https://rotiserialatriada.onrender.com/api/productos')
-        .then((response) => {
-          this.products = response.data;
-        })
-        .catch((error) => {
-          console.error(error);
-        });
+    irAGestorDeComandas() {
+      this.$router.push('/stock'); // Navega a la pantalla de stock
     },
-
-    // Añadir producto a la comanda actual
+    getDollarPrice() {
+      axios.get('https://api.exchangerate-api.com/v4/latest/USD').then((response) => {
+        this.dollarPrice = response.data.rates.ARS;
+      });
+    },
+    getProducts() {
+      axios.get('https://rotiserialatriada.onrender.com/api/productos').then((response) => {
+        this.products = response.data;
+      });
+    },
     addToOrder(product) {
       const existingItem = this.currentOrder.find((item) => item.id === product.id);
       if (existingItem) {
@@ -116,83 +131,79 @@ export default {
         this.currentOrder.push({ ...product, cantidad: 1 });
       }
     },
-
-    // Eliminar producto de la comanda actual
     removeFromOrder(item) {
       const index = this.currentOrder.indexOf(item);
       if (index > -1) {
         this.currentOrder.splice(index, 1);
       }
     },
-
-    // Confirmar la comanda y actualizar el stock
     confirmOrder() {
       this.currentOrder.forEach((item) => {
         this.createOrder(item);
-        this.updateStock(item, -item.cantidad); // Reducir el stock
+        this.updateStock(item, -item.cantidad);
       });
-      this.currentOrder = []; // Vaciar la comanda
+      this.currentOrder = [];
     },
-
-    // Crear comanda en la base de datos
-    createOrder(product) {
-      axios
-        .post('https://rotiserialatriada.onrender.com/api/comandas', {
-          product_id: product.id,
-          quantity: product.cantidad,
-        })
-        .then((response) => {
-          console.log('Comanda creada:', response.data);
-        })
-        .catch((error) => {
-          console.error(error);
-        });
-    },
-
-    // Actualizar el stock de un producto en la base de datos
-    updateStock(product, quantity) {
-      axios
-        .put(`https://rotiserialatriada.onrender.com/api/productos/${product.id}`, {
-          stock: product.stock + quantity,
-        })
-        .then((response) => {
-          console.log(`Stock actualizado: ${product.nombre} - ${product.stock}`);
-        })
-        .catch((error) => {
-          console.error(error);
-        });
-    },
-
-    // Obtener las comandas activas (excepto cerradas y canceladas)
     getActiveOrders() {
-      axios
-        .get('https://rotiserialatriada.onrender.com/api/comandas')
-        .then((response) => {
-          this.activeOrders = response.data.filter(
-            (order) => order.estado !== 'cerrada' && order.estado !== 'cancelada'
-          );
-        })
-        .catch((error) => {
-          console.error(error);
-        });
+      axios.get('https://rotiserialatriada.onrender.com/api/comandas').then((response) => {
+        this.activeOrders = response.data.filter(
+          (order) => order.estado !== 'cerrada' && order.estado !== 'cancelada'
+        );
+      });
     },
-
-    // Consultar la cotización del dólar
-    getDollarPrice() {
-      axios
-        .get('https://api.exchangerate-api.com/v4/latest/USD')
-        .then((response) => {
-          this.dollarPrice = response.data.rates.ARS; // Asumiendo que necesitas la cotización en pesos argentinos (ARS)
-        })
-        .catch((error) => {
-          console.error(error);
-        });
+    createOrder(product) {
+      axios.post('https://rotiserialatriada.onrender.com/api/comandas', {
+        product_id: product.id,
+        quantity: product.cantidad,
+      });
     },
-
-    // Navegar a la pantalla de stock
-    irAGestorDeComandas() {
-      this.$router.push('/stock'); // Ajusta la ruta según tu configuración
+    updateStock(product, quantity) {
+      axios.put(`https://rotiserialatriada.onrender.com/api/productos/${product.id}`, {
+        stock: product.stock + quantity,
+      });
     },
   },
 };
 </script>
+
+<style scoped>
+.admin-home-container {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+.nav-buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.main-content {
+  display: flex;
+  justify-content: space-between;
+}
+
+.left-panel, .right-panel {
+  flex: 1;
+  margin-right: 20px;
+}
+
+.right-panel {
+  margin-left: 20px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+th {
+  background-color: #f2f2f2;
+}
+</style>
