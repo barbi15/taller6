@@ -1,8 +1,16 @@
 <template>
   <link rel="stylesheet" href="styles/estilo1nar.css">
   <div class="login-container">
-    <h1>Iniciar Sesión</h1>
-    <form @submit.prevent="handleLogin">
+    <!-- Título de la Rotisería -->
+    <h1>INICIO DE SESION</h1>
+
+    <!-- Contenedor del logo -->
+    <div class="logo-container">
+      <!-- Aquí puedes agregar tu logo -->
+      <img src='../images/logoiniciosesion.png' alt="Logo" id="logo">
+    </div>
+    <!-- Formulario de inicio de sesión -->
+    <form @submit.prevent="handleLogin"> 
       <div class="input-group">
         <label for="username">Usuario</label>
         <input type="text" id="username" v-model="username" required />
@@ -19,7 +27,7 @@
 </template>
 
 <script>
-import '../styles/estilo1nar.css';
+import '../styles/Estilo1.css';
 import { login } from '../auth'; // Importar la función de login desde el archivo auth.js
 
 export default {
@@ -47,17 +55,14 @@ export default {
         localStorage.setItem('token', token);
         localStorage.setItem('userId', userId);
 
-        // Redirigir siempre a la pantalla del administrador (AdminHome)
-        this.$router.push('/adminhome');
-
-        // Código comentado para redirigir a la pantalla del cocinero
-        /*
+    
+        // Verifico si el usu es admin 
         if (userId === 1) {
           this.$router.push('/adminhome'); // Si el ID es 1, es administrador
         } else {
           this.$router.push('/cocinero'); // Si no, redirigir a la vista del cocinero
         }
-        */
+        
       } else {
         // Mostrar mensaje de error si el inicio de sesión falla
         this.errorMessage = `Error en el inicio de sesión: ${response.message} (Código: ${response.statusCode})`;

@@ -24,7 +24,7 @@
 </template>
 
 <script>
-import '../styles/estilo1nar.css';
+import '../styles/Estilo2.css';
 // Importar la función de registro desde auth.js
 import { register } from '../auth';
 

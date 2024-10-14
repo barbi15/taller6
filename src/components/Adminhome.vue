@@ -20,6 +20,7 @@
         <!-- Buscador de productos -->
         <div class="search-bar">
           <input v-model="searchQuery" placeholder="Buscar producto..." />
+          <button class="search-button"><i class="fas fa-search"></i></button>
         </div>
 
         <!-- Tabla de productos -->
@@ -38,8 +39,9 @@
               <td>{{ product.precio }}</td>
               <td>{{ product.stock }}</td>
               <td>
-                <button @click="addToOrder(product)" class="add-to-order-button">+</button>
-                <button @click="removeFromOrder(product)" class="remove-from-order-button">-</button>
+                <button @click="decreaseQuantity(product)" class="remove-from-order-button">-</button>
+                <span>{{ product.quantity || 0 }}</span>
+                <button @click="increaseQuantity(product)" class="add-to-order-button">+</button>
               </td>
             </tr>
           </tbody>
@@ -88,6 +90,7 @@
 </template>
 
 <script>
+import axios from 'axios';
 export default {
   data() {
     return {
@@ -119,9 +122,35 @@ export default {
       });
     },
     getProducts() {
-      axios.get('https://rotiserialatriada.onrender.com/api/productos').then((response) => {
-        this.products = response.data;
-      });
+  axios.get('https://rotiserialatriada.onrender.com/api/productos')
+    .then((response) => {
+      this.products = response.data.map((product) => ({
+        ...product,
+        quantity: 0,
+      }));
+    })
+    .catch((error) => {
+      // Manejo del error
+      console.error('Error al obtener productos:', error.message);
+      if (error.response) {
+        console.error('Error en la respuesta:', error.response.data);
+        console.error('Código de estado:', error.response.status);
+      } else if (error.request) {
+        console.error('No se recibió respuesta:', error.request);
+      } else {
+        console.error('Error al configurar la solicitud:', error.message);
+      }
+    });
+},
+    increaseQuantity(product) {
+      if (product.quantity < product.stock) {
+        product.quantity += 1;
+      }
+    },
+    decreaseQuantity(product) {
+      if (product.quantity > 0) {
+        product.quantity -= 1;
+      }
     },
     addToOrder(product) {
       const existingItem = this.currentOrder.find((item) => item.id === product.id);
@@ -165,45 +194,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.admin-home-container {
-  display: flex;
-  flex-direction: column;
-  padding: 20px;
-}
-
-.nav-buttons {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.main-content {
-  display: flex;
-  justify-content: space-between;
-}
-
-.left-panel, .right-panel {
-  flex: 1;
-  margin-right: 20px;
-}
-
-.right-panel {
-  margin-left: 20px;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-th, td {
-  border: 1px solid #ddd;
-  padding: 8px;
-}
-
-th {
-  background-color: #f2f2f2;
-}
-</style>
