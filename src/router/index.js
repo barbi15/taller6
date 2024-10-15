@@ -8,7 +8,7 @@ const routes = [
   { path: '/', redirect: '/login' }, // Redirecciona la ruta base al login
   { path: '/login', name: 'Login', component: Login }, // Ruta para la pantalla de Login
   { path: '/register', name: 'Register', component: Register }, // Ruta para la pantalla de Registro
-  { path: '/adminhome', component: Adminhome },//Ruta para la pantalla de administrador
+  { path: '/Adminhome', component: Adminhome },//Ruta para la pantalla de administrador
   { path: '/cocinero', component: CocineroHome },//Ruta para la pantalla de cocinero
   { path: '/stock', name: 'Stock', component: Stock }
 ];

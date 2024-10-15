@@ -1,6 +1,6 @@
 <template>
     <div class="stock-container">
-      <h1 class="title">Gestión de Stock</h1>
+      <h1>Gestión de Stock</h1>
   
       <!-- Buscador de productos -->
       <div class="search-bar">
@@ -27,6 +27,7 @@
   </template>
   
   <script>
+  import  '../styles/estiStock.css';
   import axios from 'axios';
   
   export default {
@@ -58,96 +59,36 @@
             console.error('Error al obtener productos:', error);
           });
       },
-  
+
       // Método para actualizar el stock de un producto
-      updateStock(product, change) {
-        if (product.stock + change < 0) {
-          alert('El stock no puede ser menor a cero.');
-          return;
-        }
-        axios
-          .put(`https://rotiserialatriada.onrender.com/api/productos/${product.id}`, {
-            stock: product.stock + change
-          })
-          .then(response => {
-            product.stock += change; // Actualizar el stock localmente tras éxito de la operación
-            console.log(`Stock actualizado: ${product.nombre} - ${product.stock}`);
-          })
-          .catch(error => {
-            console.error('Error al actualizar el stock:', error);
-          });
-      },
-  
+updateStock(product, change) {
+  if (product.stock + change < 0) {
+    alert('El stock no puede ser menor a cero.');
+    return;
+  }
+  axios
+    .put(`https://rotiserialatriada.onrender.com/api/productos/${product.id}`, {
+      stock: product.stock + change
+    })
+    .then(response => {
+      product.stock += change;
+      console.log(`Stock actualizado: ${product.nombre} - ${product.stock}`);
+      product.stock += change;  // Actualizar el stock en el frontend
+      this.getProducts();  // Refrescar la lista de productos
+    })
+    .catch(error => {
+      console.error('Error al actualizar el stock:', error);
+    });
+},
+mounted() {
+    this.getProducts();
+  },
       // Método para volver a la pantalla de Admin Home
       volver() {
-        this.$router.push('/admin'); // Ajusta la ruta según la configuración de tus rutas
+        this.$router.push('/Adminhome'); // Ajusta la ruta según la configuración de tus rutas
       }
     }
   };
   </script>
   
-  <style scoped>
-  /* Estilos de la pantalla de gestión de stock */
-  .stock-container {
-    padding: 20px;
-  }
-  
-  .title {
-    font-size: 24px;
-    margin-bottom: 20px;
-  }
-  
-  .search-bar {
-    margin-bottom: 20px;
-  }
-  
-  .product-list {
-    list-style-type: none;
-    padding: 0;
-  }
-  
-  .product-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 10px 0;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    background-color: #f9f9f9;
-  }
-  
-  .product-details {
-    flex-grow: 1;
-  }
-  
-  .product-actions {
-    display: flex;
-    align-items: center;
-  }
-  
-  .stock-button {
-    padding: 5px 10px;
-    margin: 0 5px;
-  }
-  
-  .stock-quantity {
-    width: 40px;
-    text-align: center;
-  }
-  
-  .back-button {
-    margin-top: 20px;
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  .back-button:hover {
-    background-color: #0056b3;
-  }
-  </style>
-  
+ 

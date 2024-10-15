@@ -50,24 +50,34 @@ export default {
         // Si el inicio de sesión es exitoso, obtener la información del usuario
         const token = response.data.token;
         const userId = response.data.id; // Obtener el ID del usuario
-
+        
+        console.log('User ID guardado:', userId);
+        
         // Almacenar el ID del usuario y el token en el localStorage
         localStorage.setItem('token', token);
         localStorage.setItem('userId', userId);
 
-    
-        // Verifico si el usu es admin 
+        /* 
+         Verificar si el usuario es administrador:
+         Si el userId es 1, se redirige a la pantalla Adminhome (administrador).
+         Este bloque de código se deja comentado para que puedas trabajar en la pantalla de administrador sin redireccionamiento.
+        */
+        /*
         if (userId === 1) {
-          this.$router.push('/adminhome'); // Si el ID es 1, es administrador
+          this.$router.push('/Adminhome'); // Si el ID es 1, es administrador
         } else {
           this.$router.push('/cocinero'); // Si no, redirigir a la vista del cocinero
         }
+        */
+
+        // Redirigir directamente a la pantalla de administrador (Adminhome)
+        this.$router.push('/Adminhome');
         
       } else {
         // Mostrar mensaje de error si el inicio de sesión falla
         this.errorMessage = `Error en el inicio de sesión: ${response.message} (Código: ${response.statusCode})`;
       }
-    },
-  },
+    }
+  }
 };
 </script>

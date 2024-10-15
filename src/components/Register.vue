@@ -14,9 +14,14 @@
         <label for="password">Password:</label>
         <input type="password" v-model="password" required placeholder="Ingresa tu contraseña" />
       </div>
+
+      <!-- Mensaje de validación de longitud de contraseña -->
+      <p v-if="passwordError" class="error">{{ passwordError }}</p>
+
       <button type="submit">Registrar</button>
     </form>
     <p>¿Ya tienes una cuenta? <router-link to="/login">Inicia sesión aquí</router-link></p>
+
     <!-- Mensaje de error o éxito -->
     <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
     <p v-if="successMessage" class="success">{{ successMessage }}</p>
@@ -25,21 +30,30 @@
 
 <script>
 import '../styles/Estilo2.css';
-// Importar la función de registro desde auth.js
 import { register } from '../auth';
 
 export default {
   data() {
     return {
-      name: '', // Campo de nombre de usuario
-      email: '', // Campo de correo electrónico
-      password: '', // Campo de contraseña
-      errorMessage: '', // Mensaje de error
-      successMessage: '', // Mensaje de éxito
+      name: '',
+      email: '',
+      password: '',
+      errorMessage: '',
+      successMessage: '',
+      passwordError: '', // Mensaje de error para la validación de la contraseña
     };
   },
   methods: {
     async handleRegister() {
+      // Validar que la contraseña tenga al menos 8 caracteres
+      if (this.password.length < 8) {
+        this.passwordError = 'La contraseña debe tener al menos 8 caracteres.';
+        return;
+      }
+
+      // Limpiar el mensaje de error si la contraseña es válida
+      this.passwordError = '';
+
       // Llamar a la función de registro con los datos requeridos
       const response = await register({
         nombre_usuario: this.name,
@@ -48,13 +62,11 @@ export default {
       });
 
       if (response.success) {
-        // Si el registro fue exitoso, mostrar un mensaje de éxito y redirigir al login
         this.successMessage = 'Registro exitoso. Redirigiendo a la pantalla de inicio de sesión...';
         setTimeout(() => {
           this.$router.push('/login'); // Redirigir después de 2 segundos
         }, 2000);
       } else {
-        // Mostrar el mensaje de error específico si la solicitud falla
         this.errorMessage = `Error en el registro: ${response.message} (Código: ${response.statusCode})`;
         this.successMessage = ''; // Limpiar el mensaje de éxito
       }

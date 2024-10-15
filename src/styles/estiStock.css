@@ -1,0 +1,63 @@
+
+/* Estilos de la pantalla de gestión de stock */
+.stock-container {
+  padding: 20px;
+}
+
+.title {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.search-bar {
+  margin-bottom: 20px;
+}
+
+.product-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.product-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 10px 0;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
+.product-details {
+  flex-grow: 1;
+}
+
+.product-actions {
+  display: flex;
+  align-items: center;
+}
+
+.stock-button {
+  padding: 5px 10px;
+  margin: 0 5px;
+}
+
+.stock-quantity {
+  width: 40px;
+  text-align: center;
+}
+
+.back-button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.back-button:hover {
+  background-color: #0056b3;
+}
