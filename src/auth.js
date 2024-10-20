@@ -20,13 +20,21 @@ const register = async (data) => {
 };
 
 // Función de inicio de sesión (login)
+// (modificado para almacenar el token)
 const login = async (data) => {
   try {
-    const response = await api.post('/login', data); // Ajusta la URL según el endpoint de login
+    const response = await api.post('/login', data); 
+    const token = response.data.token; // Asegúrate de que el backend te devuelve el token
+    localStorage.setItem('token', token); // Guardar token en localStorage
     return { success: true, data: response.data };
   } catch (error) {
     return handleError(error);
   }
+};
+
+// Función para obtener el token
+const getToken = () => {
+  return localStorage.getItem('token');
 };
 
 // Manejo de errores centralizado
@@ -40,4 +48,4 @@ function handleError(error) {
 }
 
 // Exportar las funciones que se utilizan en los componentes
-export { register, login };
+export { register, login, getToken }; //

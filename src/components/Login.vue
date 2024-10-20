@@ -27,57 +27,62 @@
 </template>
 
 <script>
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import '../styles/Estilo1.css';
-import { login } from '../auth'; // Importar la función de login desde el archivo auth.js
+import { login } from '../auth';
 
 export default {
-  data() {
-    return {
-      username: '',
-      password: '',
-      errorMessage: '',
-    };
-  },
-  methods: {
-    async handleLogin() {
-      // Llamar a la función de login para autenticar al usuario
-      const response = await login({
-        nombre_usuario: this.username,
-        contrasena: this.password,
-      });
+  setup() {
+    const router = useRouter();
+    const username = ref('');
+    const password = ref('');
+    const errorMessage = ref('');
 
-      if (response.success) {
-        // Si el inicio de sesión es exitoso, obtener la información del usuario
-        const token = response.data.token;
-        const userId = response.data.id; // Obtener el ID del usuario
-        
-        console.log('User ID guardado:', userId);
-        
-        // Almacenar el ID del usuario y el token en el localStorage
-        localStorage.setItem('token', token);
-        localStorage.setItem('userId', userId);
+    const handleLogin = async () => {
+      try {
+        const response = await login({
+          nombre_usuario: username.value,
+          contrasena: password.value,
+        });
 
-        /* 
-         Verificar si el usuario es administrador:
-         Si el userId es 1, se redirige a la pantalla Adminhome (administrador).
-         Este bloque de código se deja comentado para que puedas trabajar en la pantalla de administrador sin redireccionamiento.
-        */
-        /*
-        if (userId === 1) {
-          this.$router.push('/Adminhome'); // Si el ID es 1, es administrador
+        if (response.success) {
+          const { token, id: userId } = response.data;
+          
+          console.log('User ID guardado:', userId);
+          
+          // Almacenar el ID del usuario y el token en el localStorage
+          localStorage.setItem('token', token);
+          localStorage.setItem('userId', userId);
+
+          // Configurar el token para futuras solicitudes
+          configureAxiosToken(token);
+
+          // Redirigir al usuario
+          router.push('/Adminhome');
         } else {
-          this.$router.push('/cocinero'); // Si no, redirigir a la vista del cocinero
+          errorMessage.value = `Error en el inicio de sesión: ${response.message}`;
         }
-        */
-
-        // Redirigir directamente a la pantalla de administrador (Adminhome)
-        this.$router.push('/Adminhome');
-        
-      } else {
-        // Mostrar mensaje de error si el inicio de sesión falla
-        this.errorMessage = `Error en el inicio de sesión: ${response.message} (Código: ${response.statusCode})`;
+      } catch (error) {
+        console.error('Error durante el inicio de sesión:', error);
+        errorMessage.value = 'Error de conexión. Por favor, intenta de nuevo.';
       }
-    }
+    };
+
+    // Función para configurar el token en Axios
+    const configureAxiosToken = (token) => {
+      // Asumiendo que estás usando Axios
+      import('axios').then(axios => {
+        axios.default.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      });
+    };
+
+    return {
+      username,
+      password,
+      errorMessage,
+      handleLogin
+    };
   }
 };
 </script>

@@ -70,7 +70,7 @@ methods: {
     }
 
     axios
-      .get('https://rotiserialatriada.onrender.com/api/comandas', {
+      .get('https://rotiserialatriada-dgjb.onrender.com/api/comandas', {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
@@ -119,7 +119,7 @@ methods: {
 
     axios
       .put(
-        `https://rotiserialatriada.onrender.com/api/comandas/${comandaId}`,
+        `https://rotiserialatriada-dgjb.onrender.com/api/comandas/${comandaId}`,
         payload,
         {
           headers: { Authorization: `Bearer ${token}` },
