@@ -51,7 +51,7 @@
       // Método para obtener productos del backend
       getProducts() {
         axios
-          .get('https://rotiserialatriada-lsyn.onrender.com/api/productos')
+          .get('https://rotiserialatriada-dgjb.onrender.com/api/productos')
           .then(response => {
             this.products = response.data;
           })
@@ -67,7 +67,7 @@ updateStock(product, change) {
     return;
   }
   axios
-    .put(`https://rotiserialatriada-lsyn.onrender.com/api/productos/${product.id}`, {
+    .put(`https://rotiserialatriada-dgjb.onrender.com/api/productos/${product.id}`, {
       stock: product.stock + change
     })
     .then(response => {

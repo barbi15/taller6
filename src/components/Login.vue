@@ -1,15 +1,12 @@
 <template>
   <link rel="stylesheet" href="styles/estilo1nar.css">
   <div class="login-container">
-    <!-- Título de la Rotisería -->
     <h1>INICIO DE SESION</h1>
 
-    <!-- Contenedor del logo -->
     <div class="logo-container">
-      <!-- Aquí puedes agregar tu logo -->
       <img src='../images/logoiniciosesion.png' alt="Logo" id="logo">
     </div>
-    <!-- Formulario de inicio de sesión -->
+
     <form @submit.prevent="handleLogin"> 
       <div class="input-group">
         <label for="username">Usuario</label>
@@ -29,8 +26,8 @@
 <script>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import axios from 'axios';
 import '../styles/Estilo1.css';
-import { login } from '../auth';
 
 export default {
   setup() {
@@ -41,40 +38,59 @@ export default {
 
     const handleLogin = async () => {
       try {
-        const response = await login({
+        // Enviar credenciales de inicio de sesión al servidor
+        const response = await axios.post('https://taller6-alejo.onrender.com/login', {
           nombre_usuario: username.value,
-          contrasena: password.value,
+          contrasena: password.value
         });
 
-        if (response.success) {
+        // Verificar si el inicio de sesión fue exitoso
+        if (response.data && response.data.token) {
           const { token, id: userId } = response.data;
-          
-          console.log('User ID guardado:', userId);
-          
-          // Almacenar el ID del usuario y el token en el localStorage
+
+          // Almacenar el token y el ID de usuario en localStorage
           localStorage.setItem('token', token);
           localStorage.setItem('userId', userId);
 
-          // Configurar el token para futuras solicitudes
+          // Configurar Axios para incluir el token en futuras solicitudes
           configureAxiosToken(token);
 
-          // Redirigir al usuario
+          // Validar el token obtenido (no bloquear, pero mostrar advertencia si falla)
+          validateToken(token);
+
+          // Redirigir al usuario a Adminhome
           router.push('/Adminhome');
         } else {
-          errorMessage.value = `Error en el inicio de sesión: ${response.message}`;
+          errorMessage.value = 'Credenciales incorrectas.';
         }
       } catch (error) {
         console.error('Error durante el inicio de sesión:', error);
-        errorMessage.value = 'Error de conexión. Por favor, intenta de nuevo.';
+        errorMessage.value = error.response?.data?.message || 'Error de conexión. Por favor, intenta de nuevo.';
       }
     };
 
-    // Función para configurar el token en Axios
+    // Función para validar el token usando el endpoint /me (manejar si falla, sin bloquear)
+    const validateToken = async (token) => {
+      try {
+        const response = await axios.get('https://taller6-alejo.onrender.com/me', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        if (response.status !== 200) {
+          console.warn('Token inválido o respuesta inesperada.');
+        } else {
+          console.log('Token validado correctamente');
+        }
+      } catch (error) {
+        console.warn('Error al validar el token, pero el login es correcto:', error.response?.data || error.message);
+      }
+    };
+
+    // Configurar Axios para agregar automáticamente el token en las cabeceras
     const configureAxiosToken = (token) => {
-      // Asumiendo que estás usando Axios
-      import('axios').then(axios => {
-        axios.default.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      });
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     };
 
     return {

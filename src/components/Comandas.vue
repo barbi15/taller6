@@ -31,7 +31,7 @@ export default {
         return;
       }
 
-      axios.get('https://rotiserialatriada-lsyn.onrender.com/api/comandas', {
+      axios.get('https://rotiserialatriada-dgjb.onrender.com/api/comandas', {
         headers: {
           Authorization: `Bearer ${token}` // Incluir el token en la solicitud
         }
