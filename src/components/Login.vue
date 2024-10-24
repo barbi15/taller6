@@ -55,10 +55,7 @@ export default {
           // Configurar Axios para incluir el token en futuras solicitudes
           configureAxiosToken(token);
 
-          // Validar el token obtenido (no bloquear, pero mostrar advertencia si falla)
-          validateToken(token);
-
-          // Redirigir al usuario a Adminhome
+          // Redirigir al usuario al panel de administrador o inicio de usuario
           router.push('/Adminhome');
         } else {
           errorMessage.value = 'Credenciales incorrectas.';
@@ -66,25 +63,6 @@ export default {
       } catch (error) {
         console.error('Error durante el inicio de sesión:', error);
         errorMessage.value = error.response?.data?.message || 'Error de conexión. Por favor, intenta de nuevo.';
-      }
-    };
-
-    // Función para validar el token usando el endpoint /me (manejar si falla, sin bloquear)
-    const validateToken = async (token) => {
-      try {
-        const response = await axios.get('https://taller6-alejo.onrender.com/me', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-
-        if (response.status !== 200) {
-          console.warn('Token inválido o respuesta inesperada.');
-        } else {
-          console.log('Token validado correctamente');
-        }
-      } catch (error) {
-        console.warn('Error al validar el token, pero el login es correcto:', error.response?.data || error.message);
       }
     };
 
