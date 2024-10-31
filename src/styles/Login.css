@@ -1,23 +1,23 @@
 /* Estilos personalizados para la pantalla de login*/
 body {
-  background-color: #c1b0b0;
+  background-color: #f2e1e1;
   font-family: Arial, sans-serif;
 }
 
 .login-container {
-  width: 350px;
-  margin: 50px auto;
-  padding: 20px;
+  width: 330px;
+  margin: 20px auto;
+  padding: 15px;
   border-radius: 10px;
   background: url('src/images/logorotiseria.png');
-  background: linear-gradient(180deg, #f03c39, #f46a57);
+  background: linear-gradient(180deg, #c92a15, #dd3620);
   box-shadow: 0px 0px 15px rgba(171, 166, 166, 0.233);
 }
 
 h1 {
   text-align: center;
   font-size: 24px;
-  color: white;
+  color: rgba(255, 248, 248, 0.964);
   margin-bottom: 20px;
   font-family: Arial, sans-serif;
 }
@@ -39,9 +39,9 @@ h1 {
 
 .input-group label {
   display: block;
+  text-align: center;
   margin-bottom: 5px;
-  color: rgb(255, 254, 254);
-  font-weight: bold;
+  color: rgb(11, 10, 10);
 }
 
 .input-group input {
@@ -55,7 +55,7 @@ h1 {
 button[type="submit"] {
   width: 100%;
   padding: 10px;
-  background-color: #8ff2ebfa;
+  background-color: #79f2eafa;
   border: none;
   border-radius: 5px;
   color: rgb(111, 108, 108);
@@ -75,6 +75,6 @@ button[type="submit"]:hover {
 }
 
 .error {
-  color: red;
+  color: rgb(255, 255, 255);
   margin-top: 10px;
 }

@@ -1,7 +1,7 @@
 <template>
   <link rel="stylesheet" href="styles/estilo1nar.css">
   <div class="login-container">
-    <h1>INICIO DE SESION</h1>
+    <h1>ROTISERIA LA TRIADA</h1>
 
     <div class="logo-container">
       <img src='../images/logoiniciosesion.png' alt="Logo" id="logo">
@@ -27,7 +27,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
-import '../styles/Estilo1.css';
+import '../styles/Login.css';
 
 export default {
   setup() {
@@ -38,25 +38,24 @@ export default {
 
     const handleLogin = async () => {
       try {
-        // Enviar credenciales de inicio de sesión al servidor
         const response = await axios.post('https://taller6-alejo.onrender.com/login', {
           nombre_usuario: username.value,
           contrasena: password.value
         });
 
-        // Verificar si el inicio de sesión fue exitoso
         if (response.data && response.data.token) {
           const { token, id: userId } = response.data;
 
-          // Almacenar el token y el ID de usuario en localStorage
           localStorage.setItem('token', token);
           localStorage.setItem('userId', userId);
-
-          // Configurar Axios para incluir el token en futuras solicitudes
           configureAxiosToken(token);
 
-          // Redirigir al usuario al panel de administrador o inicio de usuario
-          router.push('/Adminhome');
+          // Verifica el rol y redirige según el nombre de usuario
+          if (username.value.toLowerCase().includes('admin')) {
+            router.push('/Adminhome');
+          } else {
+            router.push('/CocineroHome');
+          }
         } else {
           errorMessage.value = 'Credenciales incorrectas.';
         }
@@ -66,7 +65,6 @@ export default {
       }
     };
 
-    // Configurar Axios para agregar automáticamente el token en las cabeceras
     const configureAxiosToken = (token) => {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     };
