@@ -5,12 +5,16 @@
 }
 
 .title {
+  color: aquamarine;
   font-size: 24px;
   margin-bottom: 20px;
 }
 
 .search-bar {
   margin-bottom: 20px;
+  color: #f9f9f9;
+  background-color: white;
+  width: 40%;
 }
 
 .product-list {
@@ -39,8 +43,11 @@
 }
 
 .stock-button {
-  padding: 5px 10px;
-  margin: 0 5px;
+  padding: 15px;
+  margin: 10px;
+  max-height: 12px;
+  width: auto;
+  margin-top: auto;
 }
 
 .stock-quantity {
@@ -48,16 +55,45 @@
   text-align: center;
 }
 
-.back-button {
-  margin-top: 20px;
-  padding: 10px 20px;
-  background-color: #007bff;
+.add-product-section {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.add-product-input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.add-product-button,
+.back-button,
+.save-changes-button,
+.delete-button {
+  padding: 12px;
+  width: 100px;
+  margin-right: 20px;
+  background-color: #28a745;
   color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
 }
 
-.back-button:hover {
-  background-color: #0056b3;
+.add-product-button:hover,
+.back-button:hover,
+.save-changes-button:hover,
+.delete-button:hover {
+  background-color: #a4c9ac;
 }
+
+.product-list-container {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px;
+}
+
+

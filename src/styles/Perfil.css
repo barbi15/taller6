@@ -1,0 +1,68 @@
+.cook-profile {
+    max-width: 400px;
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #da9d9d; /* Borde en tono gris oscuro */
+    border-radius: 10px;
+    background-color: #f26e5f; /* Fondo en tono negro */
+    color: #f3ebeb; /* Texto claro */
+  }
+  
+  h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #ffffff; /* Título en blanco */
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #cccccc; /* Color de etiqueta en gris claro */
+  }
+  
+  p {
+    color: #ffffff; /* Texto de datos del usuario en blanco */
+    background-color: #7c7c7c; /* Fondo gris oscuro */
+    padding: 8px;
+    border-radius: 5px;
+  }
+  
+  input {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+    margin-top: 5px;
+    color: #ffffff; /* Texto del input en blanco */
+    background-color: #333; /* Fondo gris oscuro */
+    border: 1px solid #555; /* Borde gris oscuro */
+    border-radius: 5px;
+  }
+  
+  button {
+    width: 100%;
+    padding: 10px;
+    background-color: #07c47f;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  
+  button:hover {
+    background-color: #2e91d7;
+  }
+  
+  button[type="button"] {
+    background-color: #6c757d; /* Color de botón para acciones individuales */
+  }
+  
+  button[type="button"]:hover {
+    background-color: #e5edf304;
+  }
+ 

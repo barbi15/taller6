@@ -29,7 +29,7 @@
 </template>
 
 <script>
-import '../styles/Estilo2.css';
+import '../styles/Registro.css';
 import { register } from '../auth';
 
 export default {
@@ -63,8 +63,13 @@ export default {
 
       if (response.success) {
         this.successMessage = 'Registro exitoso. Redirigiendo a la pantalla de inicio de sesión...';
+        // Redirigir según el tipo de usuario
         setTimeout(() => {
-          this.$router.push('/login'); // Redirigir después de 2 segundos
+          if (this.name.toLowerCase().includes('admin') || this.name.toLowerCase().includes('administrador')) {
+            this.$router.push('/adminhome');
+          } else {
+            this.$router.push('/cocinerohome');
+          }
         }, 2000);
       } else {
         this.errorMessage = `Error en el registro: ${response.message} (Código: ${response.statusCode})`;

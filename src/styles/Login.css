@@ -1,4 +1,4 @@
-/* Estilos personalizados para la pantalla de login*/
+/* Estilos personalizados para la pantalla de login */
 body {
   background-color: #f2e1e1;
   font-family: Arial, sans-serif;
@@ -9,9 +9,8 @@ body {
   margin: 20px auto;
   padding: 15px;
   border-radius: 10px;
-  background: url('src/images/logorotiseria.png');
-  background: linear-gradient(180deg, #c92a15, #dd3620);
-  box-shadow: 0px 0px 15px rgba(171, 166, 166, 0.233);
+  background: linear-gradient(180deg, #db8854, #ec6d29c6);
+  box-shadow: 0px 0px 15px rgba(240, 233, 233, 0.908);
 }
 
 h1 {
@@ -41,7 +40,7 @@ h1 {
   display: block;
   text-align: center;
   margin-bottom: 5px;
-  color: rgb(11, 10, 10);
+  color: rgb(234, 227, 227);
 }
 
 .input-group input {
@@ -50,31 +49,39 @@ h1 {
   border: none;
   border-radius: 5px;
   box-sizing: border-box;
+  background-color: white; /* Fondo blanco para los campos */
+  color: black; /* Texto negro en los campos */
 }
 
 button[type="submit"] {
   width: 100%;
   padding: 10px;
-  background-color: #79f2eafa;
-  border: none;
+  background-color: #ec6d29; /* Naranja claro */
   border-radius: 5px;
-  color: rgb(111, 108, 108);
+  color: rgb(249, 244, 244);
   font-weight: bold;
   cursor: pointer;
 }
 
 button[type="submit"]:hover {
-  background-color: #ef9583;
+  background-color: #dca499; /* Color al pasar el mouse */
 }
 
+/* Ajustes para el botón de registro */
 .register-link {
   text-align: center;
   display: block;
   margin-top: 15px;
-  color: white;
+  color: #ec6d29; /* Cambia el color del texto del enlace */
+  background: none; /* Sin fondo */
+  border: none; /* Sin borde */
+  cursor: pointer; /* Cambio de cursor */
 }
 
+/* Estilos para el mensaje de error */
 .error {
-  color: rgb(255, 255, 255);
+  color: black; /* Texto negro para los mensajes de error */
   margin-top: 10px;
+  background: none; /* Sin fondo */
+  border: none; /* Sin borde */
 }

@@ -2,19 +2,19 @@
   <h2>Pantalla Administrador/a</h2>
 
   <!-- Botón para redirigir al perfil de administrador -->
-  <div class="button-container">
-    <button @click="verPerfil" class="profile-button">Ver Perfil</button>
+  <div class="button1-container">
+    <button @click="verPerfil" class="verperfil-button">Ver Perfil</button>
   </div>
 
   <!-- Botones de Cotización y Verificación de Stock -->
-  <div class="button-container">
+  <div class="button2-container">
     <button @click="obtenerCotizacionDolar" class="dollar-button">Cotización del Dólar</button>
     <button @click="verificarStock" class="stock-button">Verificar Stock</button>
   </div>
 
   <div class="admin-container">
     <!-- Columna izquierda: Buscador y lista de productos -->
-    <div class="left-column">
+    <div class="leftproduct-column">
       <h2>Buscar productos</h2>
       <input type="text" v-model="filtro" placeholder="Filtrar productos" />
 
@@ -23,16 +23,19 @@
         <li v-for="producto in productosFiltrados" :key="producto.id">
           {{ producto.nombre }} - Precio: ${{ producto.precio }} - Stock: {{ producto.stock }}
           <div>
-            <button @click="reducirCantidad(producto)">-</button>
+            <button class="adjust-stock-button" @click="reducirCantidad(producto)">-</button>
             {{ producto.cantidad }}
-            <button @click="aumentarCantidad(producto)">+</button>
+            <button class="adjust-stock-button" @click="aumentarCantidad(producto)" :disabled="producto.stock === 0">
+              +
+            </button>
+            <span v-if="producto.stock === 0" style="color: red;">(Renovar stock)</span>
           </div>
         </li>
       </ul>
     </div>
 
     <!-- Columna derecha: Comanda actual -->
-    <div class="right-column">
+    <div class="rightcomanda-column">
       <h3>Comanda actual</h3>
       <table>
         <thead>
@@ -80,10 +83,6 @@
       </tbody>
     </table>
   </div>
-
-  <footer class="footer">
-    <p>&copy; 2024 Rotisería La Triada. Todos los derechos reservados.</p>
-  </footer>
 </template>
 
 <script>
@@ -272,18 +271,3 @@ export default {
 };
 </script>
 
-<style scoped>
-.profile-button {
-  background-color: #007bff;
-  color: rgb(236, 228, 228);
-  padding: 10px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  margin-right: 10px;
-}
-
-.profile-button:hover {
-  background-color: #0056b3;
-}
-</style>
