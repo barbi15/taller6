@@ -3,19 +3,13 @@
     <h1>Pantalla del Cocinero</h1>
 
     <div class="top-buttons">
+      
       <button @click="irAPerfilCocinero" class="perfil-button">Ver Perfil</button>
       <button @click="cerrarSesion" class="cerrarsesion-button">Cerrar Sesión</button>
     </div>
 
-    <!-- Botón para obtener la cotización del dólar más pequeño -->
-    <div class="dolar-cotizacion">
-      <button @click="obtenerCotizacionDolar" class="cotizacion-button">Obtener Cotización del Dólar</button>
-      <p v-if="cotizacionDolar">Cotización actual del dólar: {{ cotizacionDolar }}</p>
-    </div>
-
     <h2>Lista de Comandas</h2>
 
-    <!-- Contenedor con scroll para la tabla -->
     <div class="tabla-container">
       <table class="comandas-table">
         <thead>
@@ -24,6 +18,7 @@
             <th>Precio Total</th>
             <th>Fecha de Creación</th>
             <th>Estado</th>
+            <th>Detalles</th>
             <th>Acciones</th>
           </tr>
         </thead>
@@ -33,19 +28,40 @@
             <td>{{ comanda.precio_total }}</td>
             <td>{{ formatDate(comanda.created_at) }}</td>
             <td>
-              <select v-model="comanda.estado">
+              <select v-model="comanda.estado" disabled>
                 <option value="Entregado">Entregado</option>
                 <option value="Procesandose">Procesandose</option>
                 <option value="Cancelado">Cancelado</option>
               </select>
             </td>
             <td>
-              <button @click="updateComanda(comanda.id, comanda.estado)">Actualizar</button>
+              <button @click="verDetallesComanda(comanda.id)">Ver Detalles</button>
+            </td>
+            <td>
+              <button
+                :disabled="comanda.estado === 'Entregado' || comanda.estado === 'Cancelado'"
+                :class="{ disabled: comanda.estado === 'Entregado' || comanda.estado === 'Cancelado' }"
+                @click="updateComanda(comanda.id, comanda.estado)"
+              >
+                Actualizar
+              </button>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
+
+    <!-- Modal para mostrar los detalles de la comanda -->
+    <div v-if="mostrarDetalles" class="modal-detalles">
+      <h3>Detalles de la Comanda {{ detallesComanda.id }}</h3>
+      <ul>
+        <li v-for="producto in detallesComanda.productos" :key="producto.id">
+          {{ producto.producto_nombre }} - Cantidad: {{ producto.cantidad }}
+        </li>
+      </ul>
+      <button @click="cerrarModal">Cerrar</button>
+    </div>
+
     <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
   </div>
 </template>
@@ -63,7 +79,11 @@ export default {
   data() {
     return {
       comandas: [],
-      cotizacionDolar: null,
+      detallesComanda: {
+        id: null,
+        productos: []
+      },
+      mostrarDetalles: false,
       errorMessage: '',
     };
   },
@@ -98,6 +118,29 @@ export default {
           console.error('Error al obtener las comandas:', error);
         });
     },
+    async verDetallesComanda(comandaId) {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error('Token no encontrado.');
+
+        const response = await axios.get(`https://rotiserialatriada-dgjb.onrender.com/api/comanda_productos/${comandaId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        this.detallesComanda = {
+          id: comandaId,
+          productos: response.data
+        };
+        this.mostrarDetalles = true;
+      } catch (error) {
+        this.errorMessage = 'Error al obtener detalles de la comanda: ' + error.message;
+        console.error('Error al obtener detalles de la comanda:', error);
+      }
+    },
+    cerrarModal() {
+      this.mostrarDetalles = false;
+      this.detallesComanda = { id: null, productos: [] };
+    },
     async updateComanda(comandaId, newState) {
       const token = localStorage.getItem('token');
       const payload = { estado: newState };
@@ -120,17 +163,6 @@ export default {
     formatDate(dateString) {
       const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
       return new Date(dateString).toLocaleDateString(undefined, options);
-    },
-    obtenerCotizacionDolar() {
-      axios
-        .get('https://api.exchangerate-api.com/v4/latest/USD')
-        .then((response) => {
-          this.cotizacionDolar = response.data.rates.ARS;
-        })
-        .catch((error) => {
-          this.errorMessage = 'Error al obtener la cotización del dólar: ' + error.message;
-          console.error('Error al obtener la cotización del dólar:', error);
-        });
     },
   },
 };

@@ -1,0 +1,95 @@
+/* Estilos de la pantalla de gestión de stock */
+.stock-management-container {
+  padding: 10px;
+}
+
+.stock-search-bar {
+  margin-bottom: 20px;
+  background-color: white;
+  width: 40%;
+  border-radius: 10px;
+}
+input{
+  color: black;
+}
+.stock-product-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.stock-product-item {
+  display: flex;
+  justify-content: space-between;
+  margin: 5px;
+  padding: 10px;
+  border: 2px solid #949494;
+  border-radius: 3px;
+  background-color: #f9f9f9;
+}
+
+.stock-product-details {
+  flex-grow: 1;
+}
+
+.stock-product-actions {
+  display: flex;
+  align-items: center;
+}
+
+.stock-quantity-display {
+  width: 40px;
+  text-align: center;
+}
+
+.stock-add-product-section {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+/* Botones de ajuste de stock */
+.stock-adjust-button {
+  width: 10px;
+  background-color: #1dae4b;
+}
+
+.stock-add-input {
+  height: 40px;
+  padding: 15px;
+  border: 1px solid #565b55;
+  border-radius: 5px;
+  width: auto;
+}
+
+.stock-add-button,
+.stock-back-button,
+.stock-delete-button {
+  padding: 12px;
+  width: 150px;
+  margin-right: 20px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.stock-add-button:hover,
+.stock-back-button:hover,
+.stock-delete-button:hover {
+  background-color: #8cbf97;
+}
+
+/* Contenedor de la lista de productos */
+.stock-product-list-container {
+  max-height: 350px;
+  overflow-y: auto;
+  border: 1px solid #8c8989;
+  border-radius: 5px;
+  padding: 20px;
+  background-color: #71707067;
+}
+
+.stock-action-buttons {
+  margin-top: 15px;
+}

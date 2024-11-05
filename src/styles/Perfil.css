@@ -1,68 +1,67 @@
+body
+{
+  background-color: white;
+
+}
 .cook-profile {
-    max-width: 400px;
-    margin: 20px auto;
+  max-width: 400px;
+  margin: 50px auto;
     padding: 20px;
-    border: 1px solid #da9d9d; /* Borde en tono gris oscuro */
     border-radius: 10px;
-    background-color: #f26e5f; /* Fondo en tono negro */
-    color: #f3ebeb; /* Texto claro */
+    background-color: #857c7ca2; 
+    color: #ffffff; 
   }
-  
+  /*titulo*/
   h2 {
     text-align: center;
     margin-bottom: 20px;
-    color: #ffffff; /* Título en blanco */
+    color: #2a2626; /* Título en blanco */
   }
   
-  .form-group {
-    margin-bottom: 15px;
-  }
-  
-  label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 5px;
-    color: #cccccc; /* Color de etiqueta en gris claro */
-  }
   
   p {
-    color: #ffffff; /* Texto de datos del usuario en blanco */
-    background-color: #7c7c7c; /* Fondo gris oscuro */
+    color: #696464; /* Texto de datos del usuario en blanco */
+    background-color: #f9f9f9; /* Fondo gris oscuro */
     padding: 8px;
-    border-radius: 5px;
+    border-radius: 3px;
   }
   
+  /*campos de modificacion correo y contra*/
   input {
     width: 100%;
     padding: 8px;
     box-sizing: border-box;
     margin-top: 5px;
-    color: #ffffff; /* Texto del input en blanco */
-    background-color: #333; /* Fondo gris oscuro */
     border: 1px solid #555; /* Borde gris oscuro */
-    border-radius: 5px;
+    border-radius: 3px;
+    color: #f7f7f7; /* Texto de datos del usuario en blanco */
+    background-color: #e2e2e2;
   }
-  
+  /*guardr cambios y volver*/
   button {
-    width: 100%;
+    width: 40%;
     padding: 10px;
-    background-color: #07c47f;
+    background-color: #0f3762;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     margin-top: 10px;
+    margin-left: 10px;
+  }
+  .form-group {
+    margin-bottom: 15px;
   }
   
   button:hover {
-    background-color: #2e91d7;
+    background-color: #3876a59c;
   }
-  
+  /*modificar y act*/
   button[type="button"] {
-    background-color: #6c757d; /* Color de botón para acciones individuales */
+    background-color: #0f3762; /* Color de botón para acciones individuales */
   }
   
   button[type="button"]:hover {
-    background-color: #e5edf304;
+    background-color: #3876a59c;
   }
  

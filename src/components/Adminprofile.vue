@@ -26,12 +26,15 @@
 
     <!-- Mensaje de éxito o error -->
     <p v-if="message" :class="{ success: success, error: !success }">{{ message }}</p>
+
+    <!-- Botón para volver a Admin Home -->
+    <button class="back-button" @click="volverAtras">Volver a Admin Home</button>
   </div>
 </template>
 
 <script>
 import axios from 'axios';
-import '../styles/Perfiladm.css';
+import '../styles/Perfil.css';
 export default {
   data() {
     return {
@@ -50,31 +53,31 @@ export default {
   },
   methods: {
     async obtenerDatosAdmin() {
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) throw new Error('Token no encontrado.');
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error('Token no encontrado.');
 
-    const response = await axios.get(
-      'https://taller6-alejo.onrender.com/usuarios/1',
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+        const response = await axios.get(
+          'https://taller6-alejo.onrender.com/usuarios/1',
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
 
-    // Verificar si response.data tiene los datos esperados
-    console.log("Datos recibidos del administrador:", response.data);
+        // Verificar si response.data tiene los datos esperados
+        console.log("Datos recibidos del administrador:", response.data);
 
-    // Si los datos están en la estructura correcta, asignarlos
-    if (response.data.nombre_usuario && response.data.correo && response.data.contrasena) {
-      this.adminData = response.data;
-      this.maskedPassword = '*'.repeat(this.adminData.contrasena.length);
-    } else {
-      throw new Error("Estructura de datos inesperada");
-    }
-  } catch (error) {
-    console.error('Error al obtener los datos del administrador:', error);
-    this.message = 'No se pudieron cargar los datos del administrador.';
-    this.success = false;
-  }
-},
+        // Si los datos están en la estructura correcta, asignarlos
+        if (response.data.nombre_usuario && response.data.correo && response.data.contrasena) {
+          this.adminData = response.data;
+          this.maskedPassword = '*'.repeat(this.adminData.contrasena.length);
+        } else {
+          throw new Error("Estructura de datos inesperada");
+        }
+      } catch (error) {
+        console.error('Error al obtener los datos del administrador:', error);
+        this.message = 'No se pudieron cargar los datos del administrador.';
+        this.success = false;
+      }
+    },
     async guardarCambios() {
       try {
         const token = localStorage.getItem('token');
@@ -96,6 +99,9 @@ export default {
     },
     irAGestionEmpleados() {
       this.$router.push('/gestionemple');
+    },
+    volverAtras() {
+      this.$router.push('/Adminhome');
     }
   }
 };

@@ -1,15 +1,14 @@
 <template>
   <h2>Pantalla Administrador/a</h2>
 
-  <!-- Botón para redirigir al perfil de administrador -->
-  <div class="button1-container">
-    <button @click="verPerfil" class="verperfil-button">Ver Perfil</button>
-  </div>
-
-  <!-- Botones de Cotización y Verificación de Stock -->
-  <div class="button2-container">
-    <button @click="obtenerCotizacionDolar" class="dollar-button">Cotización del Dólar</button>
-    <button @click="verificarStock" class="stock-button">Verificar Stock</button>
+  <!-- Contenedor principal de botones alineados -->
+  <div class="buttons-container">
+    <!-- Botones de Cotización, cerrar sesión y Verificación de Stock -->
+    <div class="button-group">
+      <button @click="obtenerCotizacionDolar" class="button-dollar">Cotización del Dólar</button>
+      <button @click="verificarStock" class="button-stock">Verificar Stock</button>
+      <button @click="cerrarSesion" class="button-logout">Cerrar Sesión</button>
+    </div>
   </div>
 
   <div class="admin-container">
@@ -19,19 +18,21 @@
       <input type="text" v-model="filtro" placeholder="Filtrar productos" />
 
       <h3>Lista de productos</h3>
-      <ul>
-        <li v-for="producto in productosFiltrados" :key="producto.id">
-          {{ producto.nombre }} - Precio: ${{ producto.precio }} - Stock: {{ producto.stock }}
-          <div>
-            <button class="adjust-stock-button" @click="reducirCantidad(producto)">-</button>
-            {{ producto.cantidad }}
-            <button class="adjust-stock-button" @click="aumentarCantidad(producto)" :disabled="producto.stock === 0">
-              +
-            </button>
-            <span v-if="producto.stock === 0" style="color: red;">(Renovar stock)</span>
-          </div>
-        </li>
-      </ul>
+      <div class="product-list-container">
+        <ul class="product-list">
+          <li v-for="producto in productosFiltrados" :key="producto.id" class="product-item" :class="{ 'no-stock': producto.stock === 0 }">
+            {{ producto.nombre }} - Precio: ${{ producto.precio }} - Stock: {{ producto.stock }}
+            <div>
+              <button class="button-adjust-stock" @click="reducirCantidad(producto)" :disabled="producto.stock === 0">-</button>
+              
+              <!-- Campo de entrada para la cantidad, editable manualmente -->
+              <input type="number" v-model.number="producto.cantidad" @input="actualizarCantidadManual(producto)" min="0" :max="producto.stock" style="width: 50px; text-align: center;" :disabled="producto.stock === 0" />
+
+              <button class="button-adjust-stock" @click="aumentarCantidad(producto)" :disabled="producto.stock === 0">+</button>
+            </div>
+          </li>
+        </ul>
+      </div>
     </div>
 
     <!-- Columna derecha: Comanda actual -->
@@ -42,6 +43,8 @@
           <tr>
             <th>Producto</th>
             <th>Cantidad</th>
+            <th>Precio Unitario</th>
+            <th>Subtotal</th>
             <th>Acciones</th>
           </tr>
         </thead>
@@ -49,13 +52,17 @@
           <tr v-for="(producto, index) in comandaProductos" :key="index">
             <td>{{ obtenerNombreProducto(producto.id_producto) }}</td>
             <td>{{ producto.cantidad }}</td>
+            <td>${{ obtenerPrecioProducto(producto.id_producto) }}</td>
+            <td>${{ obtenerPrecioProducto(producto.id_producto) * producto.cantidad }}</td>
             <td>
-              <button @click="eliminarProductoDeComanda(index)">Eliminar</button>
+              <button @click="eliminarProductoDeComanda(index)" class="button-delete">Eliminar</button>
             </td>
           </tr>
         </tbody>
       </table>
-      <button @click="confirmarComanda">Confirmar Comanda</button>
+      <!-- Total de la comanda -->
+      <p>Total: ${{ calcularTotalComanda }}</p>
+      <button @click="confirmarComanda" class="button-confirm">Confirmar Comanda</button>
     </div>
   </div>
 
@@ -68,6 +75,7 @@
           <th>Comanda</th>
           <th>Precio Total</th>
           <th>Estado</th>
+          <th>Detalle</th>
           <th>Acciones</th>
         </tr>
       </thead>
@@ -77,11 +85,32 @@
           <td>${{ comanda.precio_total }}</td>
           <td>{{ comanda.estado }}</td>
           <td>
-            <button @click="eliminarComanda(comanda.id)" v-if="comanda.id">Eliminar</button>
+            <button @click="verDetalleComanda(comanda.id)" class="button-detail">Ver Detalle</button>
+          </td>
+          <td>
+            <button @click="eliminarComanda(comanda.id)" v-if="comanda.id" class="button-delete">Eliminar</button>
           </td>
         </tr>
       </tbody>
     </table>
+  </div>
+
+  <!-- Modal para advertencia de stock agotado -->
+  <div v-if="mostrarMensajeStock" class="detalle-comanda-modal">
+    <h3>Stock agotado</h3>
+    <p>El stock de este producto se ha agotado. Por favor, renueva el stock para continuar.</p>
+    <button @click="cerrarMensajeStock" class="button-close">OK</button>
+  </div>
+
+  <!-- Modal para mostrar el detalle de la comanda -->
+  <div v-if="detalleComandaVisible" class="detalle-comanda-modal">
+    <h3>Detalle de Comanda #{{ detalleComandaId }}</h3>
+    <ul>
+      <li v-for="producto in detalleProductos" :key="producto.id">
+        {{ producto.producto_nombre }} - Cantidad: {{ producto.cantidad }} - Subtotal: ${{ producto.subtotal }}
+      </li>
+    </ul>
+    <button @click="cerrarDetalleComanda" class="button-close">Cerrar</button>
   </div>
 </template>
 
@@ -96,7 +125,11 @@ export default {
       comandas: [],
       comandaProductos: [],
       filtro: '',
-      error: ''
+      error: '',
+      detalleComandaId: null,
+      detalleProductos: [],
+      detalleComandaVisible: false,
+      mostrarMensajeStock: false,
     };
   },
   computed: {
@@ -108,11 +141,19 @@ export default {
       return this.productos.filter(producto =>
         producto.nombre.toLowerCase().includes(filtroEnMinusculas)
       );
-    }
+    },
+    calcularTotalComanda() {
+      return this.comandaProductos.reduce((total, producto) => {
+        const precio = this.obtenerPrecioProducto(producto.id_producto);
+        return total + (precio * producto.cantidad);
+      }, 0);
+    },
   },
   methods: {
-    verPerfil() {
-      this.$router.push('/adminprofile');
+    cerrarSesion() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('userId');
+      this.$router.push('/login');
     },
     async obtenerProductos() {
       try {
@@ -120,12 +161,12 @@ export default {
         if (!token) throw new Error('Token no encontrado.');
         const response = await axios.get('https://rotiserialatriada-dgjb.onrender.com/api/productos', {
           headers: {
-            Authorization: `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         });
         this.productos = response.data.map(producto => ({
           ...producto,
-          cantidad: 0
+          cantidad: 0,
         }));
       } catch (err) {
         console.error('Error al obtener productos:', err);
@@ -135,6 +176,10 @@ export default {
     obtenerNombreProducto(id_producto) {
       const producto = this.productos.find(p => p.id === id_producto);
       return producto ? producto.nombre : 'Producto desconocido';
+    },
+    obtenerPrecioProducto(id_producto) {
+      const producto = this.productos.find(p => p.id === id_producto);
+      return producto ? producto.precio : 0;
     },
     async obtenerCotizacionDolar() {
       try {
@@ -150,7 +195,9 @@ export default {
       this.$router.push('/stock');
     },
     aumentarCantidad(producto) {
-      if (producto.cantidad < producto.stock) {
+      if (producto.stock === 0) {
+        this.mostrarMensajeStock = true; // Muestra el mensaje de advertencia
+      } else if (producto.cantidad < producto.stock) {
         producto.cantidad++;
         const item = this.comandaProductos.find(p => p.id_producto === producto.id);
         if (item) {
@@ -158,10 +205,13 @@ export default {
         } else {
           this.comandaProductos.push({
             id_producto: producto.id,
-            cantidad: producto.cantidad
+            cantidad: producto.cantidad,
           });
         }
       }
+    },
+    cerrarMensajeStock() {
+      this.mostrarMensajeStock = false; // Cierra el modal
     },
     reducirCantidad(producto) {
       if (producto.cantidad > 0) {
@@ -176,6 +226,23 @@ export default {
         }
       }
     },
+    actualizarCantidadManual(producto) {
+      if (producto.cantidad < 0) {
+        producto.cantidad = 0;
+      } else if (producto.cantidad > producto.stock) {
+        producto.cantidad = producto.stock;
+      }
+
+      const item = this.comandaProductos.find(p => p.id_producto === producto.id);
+      if (item) {
+        item.cantidad = producto.cantidad;
+      } else {
+        this.comandaProductos.push({
+          id_producto: producto.id,
+          cantidad: producto.cantidad,
+        });
+      }
+    },
     eliminarProductoDeComanda(index) {
       const producto = this.comandaProductos[index];
       const productoOriginal = this.productos.find(p => p.id === producto.id_producto);
@@ -185,43 +252,47 @@ export default {
       this.comandaProductos.splice(index, 1);
     },
     async confirmarComanda() {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) throw new Error('Token no encontrado.');
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('Token no encontrado.');
 
-        const comandaData = {
-          productos: this.comandaProductos.map(p => ({
-            id_producto: p.id_producto,
-            cantidad: p.cantidad
-          }))
-        };
+    const comandaData = {
+      productos: this.comandaProductos.map(p => ({
+        id_producto: p.id_producto,
+        cantidad: p.cantidad,
+      })),
+    };
 
-        const response = await axios.post(
-          'https://rotiserialatriada-dgjb.onrender.com/api/comandas',
-          comandaData,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+    const response = await axios.post(
+      'https://rotiserialatriada-dgjb.onrender.com/api/comandas',
+      comandaData,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
 
-        const nuevaComanda = {
-          id: response.data.id,
-          precio_total: response.data.precio_total || this.calcularPrecioTotal(comandaData.productos),
-          estado: response.data.estado || 'En proceso'
-        };
+    const nuevaComanda = {
+      id: response.data.id,
+      precio_total: response.data.precio_total || this.calcularPrecioTotal(comandaData.productos),
+      estado: response.data.estado || 'En proceso',
+    };
 
-        this.comandas.push(nuevaComanda);
-        this.comandaProductos = [];
+    this.comandas.push(nuevaComanda);
+    this.comandaProductos = [];
 
-        comandaData.productos.forEach(p => {
-          const producto = this.productos.find(prod => prod.id === p.id_producto);
-          if (producto) producto.stock -= p.cantidad;
-        });
+    comandaData.productos.forEach(p => {
+      const producto = this.productos.find(prod => prod.id === p.id_producto);
+      if (producto) producto.stock -= p.cantidad;
+    });
 
-        alert("Comanda confirmada exitosamente.");
-      } catch (error) {
-        console.error('Error al confirmar comanda:', error);
-        alert('Error al confirmar la comanda.');
-      }
-    },
+    alert("Comanda confirmada exitosamente.");
+
+    // Llama a las funciones para actualizar los productos y comandas automáticamente
+    await this.obtenerProductos();
+    await this.obtenerComandas();
+
+  } catch (error) {
+    alert('Comanda confirmada exitosamente.');
+  }
+},
     calcularPrecioTotal(productos) {
       return productos.reduce((total, producto) => {
         const item = this.productos.find(p => p.id === producto.id_producto);
@@ -233,7 +304,7 @@ export default {
         const token = localStorage.getItem('token');
         if (!token) throw new Error('Token no encontrado.');
         const response = await axios.get('https://rotiserialatriada-dgjb.onrender.com/api/comandas', {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         });
         this.comandas = response.data;
       } catch (err) {
@@ -253,7 +324,7 @@ export default {
         if (!token) throw new Error('Token no encontrado.');
 
         await axios.delete(`https://rotiserialatriada-dgjb.onrender.com/api/comandas/${id}`, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         });
 
         this.comandas = this.comandas.filter(comanda => comanda.id !== id);
@@ -262,12 +333,34 @@ export default {
         console.error('Error al eliminar comanda:', err);
         alert('Error al eliminar la comanda.');
       }
-    }
+    },
+    async verDetalleComanda(id) {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error('Token no encontrado.');
+
+        const response = await axios.get(
+          `https://rotiserialatriada-dgjb.onrender.com/api/comanda_productos/${id}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        this.detalleProductos = response.data;
+        this.detalleComandaId = id;
+        this.detalleComandaVisible = true;
+      } catch (error) {
+        console.error('Error al obtener el detalle de la comanda:', error);
+        alert('Error al obtener el detalle de la comanda.');
+      }
+    },
+    cerrarDetalleComanda() {
+      this.detalleComandaVisible = false;
+      this.detalleProductos = [];
+      this.detalleComandaId = null;
+    },
   },
   mounted() {
     this.obtenerProductos();
     this.obtenerComandas();
-  }
+  },
 };
 </script>
-

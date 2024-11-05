@@ -2,8 +2,7 @@
   <div id="app">
     <router-view></router-view>
     <footer class="footer">
-      <p>&copy; 2024 Rotisería La Triada. Todos los derechos reservados.</p>
-    </footer>
+    ©2024 Rotiseria La Triada. Todos los derechos reservados.</footer>
   </div>
 </template>
 
@@ -15,24 +14,13 @@ export default {
 
 <style>
 body {
-  font-family: 'Arial', sans-serif;
-  background-color: #ffffff;
-  margin: 0;
+  font-family:Arial, Helvetica, sans-serif;
+  background-image: url('../src/images/logorotiseria.png') repeat;
 }
-
-#app {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh; /* Ocupa toda la altura de la ventana */
-}
-
-footer.footer {
+.footer {
+  background-color: #616161; /* Color de fondo */
+  color: #fff;            /* Color del texto */
+  padding: 10px 20px;
   text-align: center;
-  padding: 10px;
-  background-color: #c4ced8;
-  color: #abb2b8;
-  font-size: 0.9em;
-  margin-top: auto; /* Mueve el footer al final del contenedor flex */
 }
-
 </style>

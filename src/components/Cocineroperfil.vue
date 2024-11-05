@@ -3,36 +3,36 @@
     <h2>Perfil del Cocinero</h2>
 
     <!-- Campo de Usuario (solo lectura) -->
-    <div class="form-group">
+    <div class="form1-group">
       <label>Usuario</label>
       <p>{{ cookData.nombre_usuario }}</p>
     </div>
 
     <!-- Modificar Correo -->
-    <div class="form-group">
+    <div class="form2-group">
       <label>Correo Electrónico</label>
       <p>{{ cookData.correo }}</p>
-      <button type="button" @click="toggleEmailEdit">Modificar Correo</button>
+      <button type="button3" @click="toggleEmailEdit">Modificar Correo</button>
       <div v-if="isEmailEditVisible">
         <input type="email" v-model="newEmail" placeholder="Nuevo correo" required />
       </div>
     </div>
 
     <!-- Modificar Contraseña -->
-    <div class="form-group">
+    <div class="form3-group">
       <label>Contraseña</label>
-      <button type="button" @click="togglePasswordEdit">Actualizar Contraseña</button>
+      <button type="button3" @click="togglePasswordEdit">Actualizar Contraseña</button>
       <div v-if="isPasswordEditVisible">
         <input type="password" v-model="newPassword" placeholder="Nueva contraseña" />
       </div>
     </div>
-
+    <div class="form4-group">
     <!-- Botón para guardar cambios -->
     <button @click="guardarCambios">Guardar Cambios</button>
-
     <!-- Botón para volver a la pantalla Cocinero Home -->
     <button @click="volverAHome">Volver a Home</button>
   </div>
+</div>
 </template>
 
 <script>

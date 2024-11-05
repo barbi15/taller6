@@ -1,22 +1,25 @@
 <template>
   <link rel="stylesheet" href="styles/estilo1nar.css">
   <div class="login-container">
-    <h1>ROTISERIA LA TRIADA</h1>
+    <h1>Rotiseria La Triada</h1>
+   
 
     <div class="logo-container">
-      <img src='../images/logoiniciosesion.png' alt="Logo" id="logo">
+      <img src='../images/logoinicio3.png' alt="Logo" id="logo">
     </div>
-
+ <h1>Iniciar Sesión</h1>
     <form @submit.prevent="handleLogin"> 
       <div class="input-group">
         <label for="username">Usuario</label>
-        <input type="text" id="username" v-model="username" required />
+        <input type="text" id="username" v-model="username" required placeholder="Usuario"/>
       </div>
       <div class="input-group">
         <label for="password">Contraseña</label>
-        <input type="password" id="password" v-model="password" required />
+        <input type="password" id="password" v-model="password" required placeholder="Contraseña" />
       </div>
-      <button type="submit">Iniciar Sesión</button>
+      <div class="inicio">
+        <button type="submit">Iniciar Sesión</button>
+      </div>
     </form>
     <p>¿No tienes cuenta? <router-link to="/register">Regístrate aquí</router-link></p>
     <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
@@ -27,7 +30,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
-import '../styles/Login.css';
+import '../styles/Estilo1.css';
 
 export default {
   setup() {

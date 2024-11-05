@@ -3,7 +3,7 @@
     <h2>Registro de Usuario</h2>
     <form @submit.prevent="handleRegister">
       <div class="form-group">
-        <label for="name">Nombre de Usuario:</label>
+        <label for="name">Usuario:</label>
         <input type="text" v-model="name" required placeholder="Ingresa tu nombre de usuario" />
       </div>
       <div class="form-group">
@@ -11,8 +11,8 @@
         <input type="email" v-model="email" required placeholder="Ingresa tu correo electrónico" />
       </div>
       <div class="form-group">
-        <label for="password">Password:</label>
-        <input type="password" v-model="password" required placeholder="Ingresa tu contraseña" />
+        <label for="password">Contraseña:</label>
+        <input type="password" v-model="password" required placeholder="Creacontraseña" />
       </div>
 
       <!-- Mensaje de validación de longitud de contraseña -->
@@ -29,7 +29,7 @@
 </template>
 
 <script>
-import '../styles/Registro.css';
+import '../styles/Estilo1.css';
 import { register } from '../auth';
 
 export default {
@@ -62,7 +62,7 @@ export default {
       });
 
       if (response.success) {
-        this.successMessage = 'Registro exitoso. Redirigiendo a la pantalla de inicio de sesión...';
+        this.successMessage = 'Registro exitoso. Redirigiendo a la pantalla de Inicio...';
         // Redirigir según el tipo de usuario
         setTimeout(() => {
           if (this.name.toLowerCase().includes('admin') || this.name.toLowerCase().includes('administrador')) {

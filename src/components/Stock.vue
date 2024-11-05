@@ -1,47 +1,53 @@
 <template>
-  <div class="stock-container">
+  <div class="stock-management-container">
     <h1>Gestión de Stock</h1>
 
     <!-- Buscador de productos -->
-    <div class="search-bar">
+    <div class="stock-search-bar">
       <input v-model="searchQuery" placeholder="Buscar producto..." />
     </div>
 
     <!-- Campo y botón para agregar un nuevo producto -->
-    <div class="add-product-section">
-      <input v-model="newProductName" placeholder="Nombre del nuevo producto" class="add-product-input" />
-      <input v-model.number="newProductPrice" placeholder="Precio" class="add-product-input" />
-      <input v-model.number="newProductStock" placeholder="Stock inicial" class="add-product-input" />
-      <button class="add-product-button" @click="agregarProducto">Agregar Producto</button>
+    <div class="stock-add-product-section">
+      <label for="productName">Nuevo producto:</label>
+      <input v-model="newProductName" id="productName" placeholder="Nombre del nuevo producto" class="stock-add-input" />
+      
+      <label for="productPrice">Precio:</label>
+      <input v-model.number="newProductPrice" id="productPrice" placeholder="Precio" class="stock-add-input" />
+      
+      <label for="productStock">Stock:</label>
+      <input v-model.number="newProductStock" id="productStock" placeholder="Stock inicial" class="stock-add-input" />
+      
+      <button class="stock-add-button" @click="agregarProducto">Agregar Producto</button>
     </div>
 
     <!-- Lista de Productos -->
-    <div class="product-list-container">
-      <ul class="product-list">
-        <li v-for="product in filteredProducts" :key="product.id" class="product-item">
-          <div class="product-details">
+    <div class="stock-product-list-container">
+      <ul class="stock-product-list">
+        <li v-for="product in filteredProducts" :key="product.id" class="stock-product-item">
+          <div class="stock-product-details">
             <span>{{ product.nombre }}</span> - ${{ product.precio }} (Stock: {{ product.stock }})
           </div>
-          <div class="product-actions">
-            <button @click="updateStock(product, -1)" class="stock-button">-</button>
-            <span class="stock-quantity">{{ product.stock }}</span>
-            <button @click="updateStock(product, 1)" class="stock-button">+</button>
-            <button @click="eliminarProducto(product.id)" class="delete-button">Eliminar</button>
+          <div class="stock-product-actions">
+            <button @click="updateStock(product, -1)" class="stock-adjust-button">-</button>
+            <span class="stock-quantity-display">{{ product.stock }}</span>
+            <button @click="updateStock(product, 1)" class="stock-adjust-button">+</button>
+            <button @click="eliminarProducto(product.id)" class="stock-delete-button">Eliminar</button>
           </div>
         </li>
       </ul>
     </div>
 
-    <!-- Botones de acción -->
-    <div class="action-buttons">
-      <button class="back-button" @click="volver">Volver a Admin Home</button>
-      <button class="save-changes-button" @click="guardarCambios">Guardar Cambios</button>
+    <!-- Botón de volver -->
+    <div class="stock-action-buttons">
+      <button class="stock-back-button" @click="volver">Volver a Admin Home</button>
     </div>
   </div>
 </template>
 
+
 <script>
-import '../styles/estiStock.css';
+import '../styles/Stock.css';
 import axios from 'axios';
 
 export default {
@@ -89,8 +95,8 @@ export default {
       const token = localStorage.getItem('token');
       const updatedProduct = {
         nombre: product.nombre,
-        stock: product.stock + change,
         precio: product.precio,
+        stock: product.stock + change,
       };
 
       axios
@@ -160,8 +166,9 @@ export default {
       const updatePromises = this.products.map((product) => {
         const productData = {
           nombre: product.nombre,
-          stock: product.stock,
           precio: product.precio,
+          stock: product.stock,
+          
         };
         
         if (product.id) {
