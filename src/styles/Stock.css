@@ -1,17 +1,46 @@
-/* Estilos de la pantalla de gestión de stock */
+/* Estilos específicos para la pantalla de gestión de stock */
+
+.stock-page-background {
+  background-image : url('../images/stockfondo.jpeg'); /* Asegúrate de que la ruta sea correcta */
+  background-size: cover; /* Asegura que el fondo cubra toda el área */
+  background-position: center; /* Centra el fondo */
+  background-repeat: no-repeat; /* Evita que el fondo se repita */
+  padding: 20px;
+}
+
+/* Otros estilos ya existentes */
 .stock-management-container {
+  /* Elimina el fondo de esta clase para evitar que se superponga */
   padding: 10px;
+}
+/* específico para el título de la página "Gestión de Stock" */
+.stock-management-container h1 {
+  background-color: rgba(255, 255, 255, 0.7); /* Blanco con opacidad de 0.7 */
+  padding: 10px;
+  border-radius: 5px; /* Bordes redondeados opcionales */
+  color: #333; /* Cambia el color del texto si lo deseas */
+}
+
+.logo2-container img {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+}
+
+.logo2-container {
+  text-align: center;
 }
 
 .stock-search-bar {
   margin-bottom: 20px;
-  background-color: white;
   width: 40%;
   border-radius: 10px;
 }
-input{
+
+input {
   color: black;
 }
+
 .stock-product-list {
   list-style-type: none;
   padding: 0;
@@ -41,23 +70,33 @@ input{
   text-align: center;
 }
 
+
 .stock-add-product-section {
   display: flex;
   gap: 15px;
   margin-bottom: 15px;
 }
+.stock-add-product-section label{
+  background-color: rgba(255, 255, 255, 0.7); /* Blanco con opacidad de 0.7 */
+  padding: 10px;
+  width: 55px;
+  border-radius: 5px; /* Bordes redondeados opcionales */
+  color: #333; /* Cambia el color del texto si lo deseas */
+}
 
 /* Botones de ajuste de stock */
 .stock-adjust-button {
-  width: 10px;
+  width: 30px;
+  justify-content: center;
   background-color: #1dae4b;
 }
 
 .stock-add-input {
   height: 40px;
   padding: 15px;
-  border: 1px solid #565b55;
+  border: 1px solid #1b1b1b;
   border-radius: 5px;
+  color: #1b1b1b;
   width: auto;
 }
 
@@ -65,10 +104,10 @@ input{
 .stock-back-button,
 .stock-delete-button {
   padding: 12px;
-  width: 150px;
+  width: 130px;
   margin-right: 20px;
   background-color: #28a745;
-  color: white;
+  color: rgb(12, 12, 12);
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -84,10 +123,10 @@ input{
 .stock-product-list-container {
   max-height: 350px;
   overflow-y: auto;
-  border: 1px solid #8c8989;
+  border: 1px solid #000000;
   border-radius: 5px;
   padding: 20px;
-  background-color: #71707067;
+  background-color: #121010ad;
 }
 
 .stock-action-buttons {

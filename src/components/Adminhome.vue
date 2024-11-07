@@ -1,116 +1,122 @@
 <template>
-  <h2>Pantalla Administrador/a</h2>
-
-  <!-- Contenedor principal de botones alineados -->
-  <div class="buttons-container">
-    <!-- Botones de Cotización, cerrar sesión y Verificación de Stock -->
-    <div class="button-group">
-      <button @click="obtenerCotizacionDolar" class="button-dollar">Cotización del Dólar</button>
-      <button @click="verificarStock" class="button-stock">Verificar Stock</button>
-      <button @click="cerrarSesion" class="button-logout">Cerrar Sesión</button>
+ 
+  <div class="admin-background">  <!-- Aquí aplicamos la clase -->
+    <div class="logo4-container">
+      <img src='../images/logorotiseria.png' alt="Logo" id="logo">
     </div>
-  </div>
+    <h2>Pantalla Administrador/a</h2>
 
-  <div class="admin-container">
-    <!-- Columna izquierda: Buscador y lista de productos -->
-    <div class="leftproduct-column">
-      <h2>Buscar productos</h2>
-      <input type="text" v-model="filtro" placeholder="Filtrar productos" />
-
-      <h3>Lista de productos</h3>
-      <div class="product-list-container">
-        <ul class="product-list">
-          <li v-for="producto in productosFiltrados" :key="producto.id" class="product-item" :class="{ 'no-stock': producto.stock === 0 }">
-            {{ producto.nombre }} - Precio: ${{ producto.precio }} - Stock: {{ producto.stock }}
-            <div>
-              <button class="button-adjust-stock" @click="reducirCantidad(producto)" :disabled="producto.stock === 0">-</button>
-              
-              <!-- Campo de entrada para la cantidad, editable manualmente -->
-              <input type="number" v-model.number="producto.cantidad" @input="actualizarCantidadManual(producto)" min="0" :max="producto.stock" style="width: 50px; text-align: center;" :disabled="producto.stock === 0" />
-
-              <button class="button-adjust-stock" @click="aumentarCantidad(producto)" :disabled="producto.stock === 0">+</button>
-            </div>
-          </li>
-        </ul>
+ <!-- Mostrar la cotización del dólar -->
+ <p class="dollar-rate">Cotización del Dólar: ${{ tasaDolar }}</p>
+    <!-- Contenedor principal de botones alineados -->
+    <div class="buttons-container">
+      <!-- Botones de cerrar sesión y Verificación de Stock -->
+      <div class="button-group">
+        <button @click="verificarStock" class="button-stock">Verificar Stock</button>
+        <button @click="cerrarSesion" class="button-logout">Cerrar Sesión</button>
       </div>
     </div>
 
-    <!-- Columna derecha: Comanda actual -->
-    <div class="rightcomanda-column">
-      <h3>Comanda actual</h3>
+    <div class="admin-container">
+      <!-- Columna izquierda: Buscador y lista de productos -->
+      <div class="leftproduct-column">
+        <h3>Buscar productos</h3>
+        <input type="text" v-model="filtro" placeholder="Filtrar productos" />
+
+        <h4>Lista de productos</h4>
+        <div class="product-list-container">
+          <ul class="product-list">
+            <li v-for="producto in productosFiltrados" :key="producto.id" class="product-item" :class="{ 'no-stock': producto.stock === 0 }">
+              {{ producto.nombre }} - Precio: ${{ producto.precio }} - Stock: {{ producto.stock }}
+              <div>
+                <button class="button-adjust-stock" @click="reducirCantidad(producto)" :disabled="producto.stock === 0">-</button>
+                
+                <!-- Campo de entrada para la cantidad, editable manualmente -->
+                <input type="number" v-model.number="producto.cantidad" @input="actualizarCantidadManual(producto)" min="0" :max="producto.stock" style="width: 40px; text-align: center;" :disabled="producto.stock === 0" />
+
+                <button class="button-adjust-stock" @click="aumentarCantidad(producto)" :disabled="producto.stock === 0">+</button>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Columna derecha: Comanda actual -->
+      <div class="rightcomanda-column">
+        <h3>Comanda actual</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Cantidad</th>
+              <th>Precio Unitario</th>
+              <th>Subtotal</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(producto, index) in comandaProductos" :key="index">
+              <td>{{ obtenerNombreProducto(producto.id_producto) }}</td>
+              <td>{{ producto.cantidad }}</td>
+              <td>US${{ obtenerPrecioProducto(producto.id_producto) }}</td>
+              <td>US${{ (obtenerPrecioProducto(producto.id_producto) * producto.cantidad).toFixed(2) }}</td>
+              <td>
+                <button @click="eliminarProductoDeComanda(index)" class="button-delete">Eliminar</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <p>Total en Dólares: US${{ calcularTotalComanda.toFixed(2) }}</p>
+        <button @click="confirmarComanda" class="button-confirm">Confirmar Comanda</button>
+      </div>
+    </div>
+
+    <!-- Tabla: Lista de Comandas debajo de ambas columnas -->
+    <div class="comandas-container">
+      <h3>Lista de Comandas</h3>
       <table>
         <thead>
           <tr>
-            <th>Producto</th>
-            <th>Cantidad</th>
-            <th>Precio Unitario</th>
-            <th>Subtotal</th>
+            <th>Comanda</th>
+            <th>Precio Total</th>
+            <th>Estado</th>
+            <th>Detalle</th>
             <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(producto, index) in comandaProductos" :key="index">
-            <td>{{ obtenerNombreProducto(producto.id_producto) }}</td>
-            <td>{{ producto.cantidad }}</td>
-            <td>${{ obtenerPrecioProducto(producto.id_producto) }}</td>
-            <td>${{ obtenerPrecioProducto(producto.id_producto) * producto.cantidad }}</td>
+          <tr v-for="comanda in comandas" :key="comanda.id">
+            <td>{{ comanda.id }}</td>
+            <td>${{ comanda.precio_total }}</td>
+            <td>{{ comanda.estado }}</td>
             <td>
-              <button @click="eliminarProductoDeComanda(index)" class="button-delete">Eliminar</button>
+              <button @click="verDetalleComanda(comanda.id)" class="button-detail">Ver Detalle</button>
+            </td>
+            <td>
+              <button @click="eliminarComanda(comanda.id)" v-if="comanda.id" class="button-delete">Eliminar</button>
             </td>
           </tr>
         </tbody>
       </table>
-      <!-- Total de la comanda -->
-      <p>Total: ${{ calcularTotalComanda }}</p>
-      <button @click="confirmarComanda" class="button-confirm">Confirmar Comanda</button>
     </div>
-  </div>
 
-  <!-- Tabla: Lista de Comandas debajo de ambas columnas -->
-  <div class="comandas-container">
-    <h3>Lista de Comandas</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Comanda</th>
-          <th>Precio Total</th>
-          <th>Estado</th>
-          <th>Detalle</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="comanda in comandas" :key="comanda.id">
-          <td>{{ comanda.id }}</td>
-          <td>${{ comanda.precio_total }}</td>
-          <td>{{ comanda.estado }}</td>
-          <td>
-            <button @click="verDetalleComanda(comanda.id)" class="button-detail">Ver Detalle</button>
-          </td>
-          <td>
-            <button @click="eliminarComanda(comanda.id)" v-if="comanda.id" class="button-delete">Eliminar</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+    <!-- Modal para advertencia de stock agotado -->
+    <div v-if="mostrarMensajeStock" class="detalle-comanda-modal">
+      <h3>Stock agotado</h3>
+      <p>El stock de este producto se ha agotado. Por favor, renueva el stock para continuar.</p>
+      <button @click="cerrarMensajeStock" class="button-close">OK</button>
+    </div>
 
-  <!-- Modal para advertencia de stock agotado -->
-  <div v-if="mostrarMensajeStock" class="detalle-comanda-modal">
-    <h3>Stock agotado</h3>
-    <p>El stock de este producto se ha agotado. Por favor, renueva el stock para continuar.</p>
-    <button @click="cerrarMensajeStock" class="button-close">OK</button>
-  </div>
-
-  <!-- Modal para mostrar el detalle de la comanda -->
-  <div v-if="detalleComandaVisible" class="detalle-comanda-modal">
-    <h3>Detalle de Comanda #{{ detalleComandaId }}</h3>
-    <ul>
-      <li v-for="producto in detalleProductos" :key="producto.id">
-        {{ producto.producto_nombre }} - Cantidad: {{ producto.cantidad }} - Subtotal: ${{ producto.subtotal }}
-      </li>
-    </ul>
-    <button @click="cerrarDetalleComanda" class="button-close">Cerrar</button>
+    <!-- Modal para mostrar el detalle de la comanda -->
+    <div v-if="detalleComandaVisible" class="detalle-comanda-modal">
+      <h3>Detalle de Comanda #{{ detalleComandaId }}</h3>
+      <ul>
+        <li v-for="producto in detalleProductos" :key="producto.id">
+          {{ producto.producto_nombre }} - Cantidad: {{ producto.cantidad }} - Subtotal: ${{ producto.subtotal }}
+        </li>
+      </ul>
+      <button @click="cerrarDetalleComanda" class="button-close">Cerrar</button>
+    </div>
   </div>
 </template>
 
@@ -130,6 +136,7 @@ export default {
       detalleProductos: [],
       detalleComandaVisible: false,
       mostrarMensajeStock: false,
+      tasaDolar: 0,
     };
   },
   computed: {
@@ -143,11 +150,14 @@ export default {
       );
     },
     calcularTotalComanda() {
-      return this.comandaProductos.reduce((total, producto) => {
-        const precio = this.obtenerPrecioProducto(producto.id_producto);
-        return total + (precio * producto.cantidad);
-      }, 0);
-    },
+    return this.comandaProductos.reduce((total, producto) => {
+      const precio = this.obtenerPrecioProducto(producto.id_producto);
+      return total + (precio * producto.cantidad);
+    }, 0);
+  },
+    totalEnPesos() {
+    return this.calcularTotalComanda * this.tasaDolar;
+  }
   },
   methods: {
     cerrarSesion() {
@@ -182,15 +192,15 @@ export default {
       return producto ? producto.precio : 0;
     },
     async obtenerCotizacionDolar() {
-      try {
-        const response = await axios.get('https://api.exchangerate-api.com/v4/latest/USD');
-        const tasaDolar = response.data.rates.ARS;
-        alert(`Cotización actual del dólar: $${tasaDolar}`);
-      } catch (error) {
-        console.error('Error al obtener la cotización del dólar:', error);
-        alert('Error al obtener la cotización del dólar');
-      }
-    },
+  try {
+    const response = await axios.get('https://api.exchangerate-api.com/v4/latest/USD');
+    this.tasaDolar = response.data.rates.ARS; // Guardar la tasa en `tasaDolar`
+    alert(`Cotización actual del dólar: $${this.tasaDolar}`);
+  } catch (error) {
+    console.error('Error al obtener la cotización del dólar:', error);
+    alert('Error al obtener la cotización del dólar');
+  }
+},
     verificarStock() {
       this.$router.push('/stock');
     },
@@ -227,22 +237,34 @@ export default {
       }
     },
     actualizarCantidadManual(producto) {
-      if (producto.cantidad < 0) {
-        producto.cantidad = 0;
-      } else if (producto.cantidad > producto.stock) {
-        producto.cantidad = producto.stock;
-      }
-
-      const item = this.comandaProductos.find(p => p.id_producto === producto.id);
-      if (item) {
-        item.cantidad = producto.cantidad;
-      } else {
-        this.comandaProductos.push({
-          id_producto: producto.id,
-          cantidad: producto.cantidad,
-        });
-      }
-    },
+  // Si el campo está vacío, establece la cantidad en 0 y elimina el producto de la comanda actual.
+  if (producto.cantidad === null || producto.cantidad === "") {
+    producto.cantidad = 0;
+    const index = this.comandaProductos.findIndex(p => p.id_producto === producto.id);
+    if (index !== -1) {
+      this.eliminarProductoDeComanda(index);
+    }
+  } else if (producto.cantidad === 0) {
+    // Si el usuario ingresa 0, muestra un mensaje de advertencia y no actualiza la comanda
+    alert("Ingrese un número mayor o igual a 1.");
+    producto.cantidad = ""; // Limpia el campo de entrada
+  } else if (producto.cantidad > producto.stock) {
+    // Si la cantidad ingresada es mayor que el stock disponible, muestra un mensaje de advertencia y ajusta al stock máximo
+    alert("No hay suficiente stock. La cantidad máxima es " + producto.stock + ".");
+    producto.cantidad = producto.stock; // Limita la cantidad al máximo del stock
+  } else {
+    // Si la cantidad es válida (entre 1 y stock máximo), actualiza o agrega a la comanda actual
+    const item = this.comandaProductos.find(p => p.id_producto === producto.id);
+    if (item) {
+      item.cantidad = producto.cantidad;
+    } else {
+      this.comandaProductos.push({
+        id_producto: producto.id,
+        cantidad: producto.cantidad,
+      });
+    }
+  }
+},
     eliminarProductoDeComanda(index) {
       const producto = this.comandaProductos[index];
       const productoOriginal = this.productos.find(p => p.id === producto.id_producto);
@@ -290,7 +312,7 @@ export default {
     await this.obtenerComandas();
 
   } catch (error) {
-    alert('Comanda confirmada exitosamente.');
+    alert('Error al confirmar la comanda.');
   }
 },
     calcularPrecioTotal(productos) {
@@ -359,8 +381,9 @@ export default {
     },
   },
   mounted() {
-    this.obtenerProductos();
-    this.obtenerComandas();
-  },
+  this.obtenerProductos();
+  this.obtenerComandas();
+  this.obtenerCotizacionDolar(); // Obtener cotización del dólar al montar el componente
+},
 };
 </script>

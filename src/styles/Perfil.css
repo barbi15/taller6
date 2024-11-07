@@ -1,8 +1,4 @@
-body
-{
-  background-color: white;
 
-}
 .cook-profile {
   max-width: 400px;
   margin: 50px auto;
@@ -20,8 +16,7 @@ body
   
   
   p {
-    color: #696464; /* Texto de datos del usuario en blanco */
-    background-color: #f9f9f9; /* Fondo gris oscuro */
+    color: #1b1919; /* Texto de datos del usuario en blanco */
     padding: 8px;
     border-radius: 3px;
   }
@@ -34,12 +29,12 @@ body
     margin-top: 5px;
     border: 1px solid #555; /* Borde gris oscuro */
     border-radius: 3px;
-    color: #f7f7f7; /* Texto de datos del usuario en blanco */
+    color: #1b1919; /* Texto de datos del usuario en blanco */
     background-color: #e2e2e2;
   }
   /*guardr cambios y volver*/
   button {
-    width: 40%;
+    width: auto;
     padding: 10px;
     background-color: #0f3762;
     color: white;

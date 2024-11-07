@@ -1,50 +1,72 @@
 <template>
-  <div class="stock-management-container">
-    <h1>Gestión de Stock</h1>
+  <div class="logo2-container">
+   
+    <!-- Aquí aplicamos la nueva clase -->
+    <div class="stock-page-background">
+      <div class="stock-management-container">
+        <img src='../images/logorotiseria.png' alt="Logo" id="logo">
+        <h1>Gestión de Stock</h1>
+      </div>
 
-    <!-- Buscador de productos -->
-    <div class="stock-search-bar">
-      <input v-model="searchQuery" placeholder="Buscar producto..." />
-    </div>
+      <!-- Buscador de productos -->
+      <div class="stock-search-bar">
+        <input v-model="searchQuery" placeholder="Buscar producto..." />
+      </div>
 
-    <!-- Campo y botón para agregar un nuevo producto -->
-    <div class="stock-add-product-section">
-      <label for="productName">Nuevo producto:</label>
-      <input v-model="newProductName" id="productName" placeholder="Nombre del nuevo producto" class="stock-add-input" />
-      
-      <label for="productPrice">Precio:</label>
-      <input v-model.number="newProductPrice" id="productPrice" placeholder="Precio" class="stock-add-input" />
-      
-      <label for="productStock">Stock:</label>
-      <input v-model.number="newProductStock" id="productStock" placeholder="Stock inicial" class="stock-add-input" />
-      
-      <button class="stock-add-button" @click="agregarProducto">Agregar Producto</button>
-    </div>
+      <!-- Campo y botón para agregar un nuevo producto -->
+      <div class="stock-add-product-section">
+        <label for="productName">Nuevo producto:</label>
+        <input v-model="newProductName" id="productName" placeholder="Nombre del nuevo producto" class="stock-add-input" />
+        
+        <!-- campo precio y stock -->
+        <label for="productPrice">Precio:</label>
+        <input 
+          v-model.number="newProductPrice" 
+          id="productPrice" 
+          type="number" 
+          min="0" 
+          step="0.01" 
+          placeholder="Precio" 
+          class="stock-add-input" 
+        />
+        
+        <label for="productStock">Stock:</label>
+        <input 
+          v-model.number="newProductStock" 
+          id="productStock" 
+          type="number" 
+          min="0" 
+          step="1" 
+          placeholder="Stock inicial" 
+          class="stock-add-input" 
+        />
+        <button class="stock-add-button" @click="agregarProducto">Agregar Producto</button>
+      </div>
 
-    <!-- Lista de Productos -->
-    <div class="stock-product-list-container">
-      <ul class="stock-product-list">
-        <li v-for="product in filteredProducts" :key="product.id" class="stock-product-item">
-          <div class="stock-product-details">
-            <span>{{ product.nombre }}</span> - ${{ product.precio }} (Stock: {{ product.stock }})
-          </div>
-          <div class="stock-product-actions">
-            <button @click="updateStock(product, -1)" class="stock-adjust-button">-</button>
-            <span class="stock-quantity-display">{{ product.stock }}</span>
-            <button @click="updateStock(product, 1)" class="stock-adjust-button">+</button>
-            <button @click="eliminarProducto(product.id)" class="stock-delete-button">Eliminar</button>
-          </div>
-        </li>
-      </ul>
-    </div>
+      <!-- Lista de Productos -->
+      <div class="stock-product-list-container">
+        <ul class="stock-product-list">
+          <li v-for="product in filteredProducts" :key="product.id" class="stock-product-item">
+            <div class="stock-product-details">
+              <span>{{ product.nombre }}</span> - ${{ product.precio }} (Stock: {{ product.stock }})
+            </div>
+            <div class="stock-product-actions">
+              <button @click="updateStock(product, -1)" class="stock-adjust-button">-</button>
+              <span class="stock-quantity-display">{{ product.stock }}</span>
+              <button @click="updateStock(product, 1)" class="stock-adjust-button">+</button>
+              <button @click="eliminarProducto(product.id)" class="stock-delete-button">Eliminar</button>
+            </div>
+          </li>
+        </ul>
+      </div>
 
-    <!-- Botón de volver -->
-    <div class="stock-action-buttons">
-      <button class="stock-back-button" @click="volver">Volver a Admin Home</button>
+      <!-- Botón de volver -->
+      <div class="stock-action-buttons">
+        <button class="stock-back-button" @click="volver">Volver al Inicio</button>
+      </div>
     </div>
   </div>
 </template>
-
 
 <script>
 import '../styles/Stock.css';
@@ -115,14 +137,20 @@ export default {
 
     // Agrega un nuevo producto al backend
     agregarProducto() {
-      if (!this.newProductName || isNaN(this.newProductPrice) || isNaN(this.newProductStock)) {
-        alert('Por favor, complete todos los campos correctamente.');
+      if (
+        !this.newProductName || 
+        isNaN(this.newProductPrice) || 
+        this.newProductPrice <= 0 || 
+        isNaN(this.newProductStock) || 
+        this.newProductStock <= 0
+      ) {
+        alert('Por favor, complete todos los campos con valores numéricos válidos.');
         return;
       }
 
       const nuevoProducto = {
         nombre: this.newProductName,
-        precio: this.newProductPrice.toFixed(2),
+        precio: parseFloat(this.newProductPrice.toFixed(2)), // Asegura formato decimal
         stock: this.newProductStock,
       };
 
@@ -168,7 +196,6 @@ export default {
           nombre: product.nombre,
           precio: product.precio,
           stock: product.stock,
-          
         };
         
         if (product.id) {

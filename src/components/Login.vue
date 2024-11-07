@@ -1,13 +1,12 @@
 <template>
-  <link rel="stylesheet" href="styles/estilo1nar.css">
-  <div class="login-container">
-    <h1>Rotiseria La Triada</h1>
+    
+  <div class="login1-container">
+    <h1 class="login-title">Rotiseria La Triada</h1>
    
-
     <div class="logo-container">
-      <img src='../images/logoinicio3.png' alt="Logo" id="logo">
+      <img src='../images/logorotiseria.png' alt="Logo" id="logo">
     </div>
- <h1>Iniciar Sesión</h1>
+    
     <form @submit.prevent="handleLogin"> 
       <div class="input-group">
         <label for="username">Usuario</label>

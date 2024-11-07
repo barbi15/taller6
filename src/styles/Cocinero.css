@@ -1,37 +1,68 @@
 .cocinero-home {
   padding: 15px;
-  color :rgb(28, 26, 26);
+  color: rgb(28, 26, 26);
+  background-image: url('../images/cocineroinicio.jpeg'); /* Asegúrate de reemplazar por la ruta correcta de tu imagen */
+  background-size: cover;
+  background-position: center;
+  
 }
-h1 {
-  color: black; 
+
+.cocinero-home h1 {
+  background-color: rgba(255, 255, 255, 0.869); /* Blanco con opacidad de 0.7 */
+  padding: 10px;
+  text-align: center;
+  border-radius: 5px; /* Bordes redondeados opcionales */
+  color: #181616; /* Cambia el color del texto si lo deseas */
 }
+.logo3-container img {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+}
+
+.logo3-container {
+  text-align: center;
+}
+
 
 .top-buttons {
   display: flex;
   justify-content: space-between; /* Centra horizontalmente los botones */
-  margin: 20px 0; /* Agrega un margen si lo deseas */
+  margin: 20px 0; 
 }
 
+.disabled-button {
+  background-color: #b1b1b1; /* Color gris para botones deshabilitados */
+  color: #666; /* Color de texto deshabilitado */
+  cursor: not-allowed;
+  pointer-events: none; /*desactiva eventos*/
+}
+
+.disabled-button:hover {
+  background-color: #ccc; 
+  color: #666; 
+}
 .tabla-container {
-  max-height: 300px; /* Limita la altura de la tabla */
-  overflow-y: auto; /* Habilita el scroll vertical */
+  max-height: 300px; 
+ width: auto;
+  overflow-y: auto; 
 }
 .comandas-table {
-  width: 70%;
+  width: 100%;
   border-collapse: collapse;
 }
 
 .comandas-table th,
 .comandas-table td {
   border: 1px solid #827979;
-  padding: 8px;
+  padding: 5px;
   text-align: center;
 }
 
 .perfil-button,
 .cerrarsesion-button {
   width: 100px;
-  background-color: #1dae4b;
+  background-color: #0359a9;
   color: rgb(236, 228, 228);
   padding: 10px;
   border: none;
@@ -43,10 +74,7 @@ h1 {
   .perfil-button:hover {
     background-color: #8fd0ae;
   }
-  .disabled {
-    background-color: grey;
-    cursor: not-allowed;
-  }
+ 
   .modal-detalles {
     /* Estilos personalizados para el modal de detalles */
     position: fixed;
@@ -59,3 +87,10 @@ h1 {
     box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
     z-index: 1000;
   }
+  .comandas-title {
+    background-color: rgba(255, 255, 255, 0.7); /* Fondo blanco semitransparente */
+    padding: 10px;
+    border-radius: 5px;
+    display: inline-block;
+  }
+  

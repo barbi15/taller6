@@ -3,7 +3,6 @@
     <h1>Pantalla del Cocinero</h1>
 
     <div class="top-buttons">
-      
       <button @click="irAPerfilCocinero" class="perfil-button">Ver Perfil</button>
       <button @click="cerrarSesion" class="cerrarsesion-button">Cerrar Sesión</button>
     </div>
@@ -28,7 +27,7 @@
             <td>{{ comanda.precio_total }}</td>
             <td>{{ formatDate(comanda.created_at) }}</td>
             <td>
-              <select v-model="comanda.estado" disabled>
+              <select v-model="comanda.estado">
                 <option value="Entregado">Entregado</option>
                 <option value="Procesandose">Procesandose</option>
                 <option value="Cancelado">Cancelado</option>
@@ -38,13 +37,7 @@
               <button @click="verDetallesComanda(comanda.id)">Ver Detalles</button>
             </td>
             <td>
-              <button
-                :disabled="comanda.estado === 'Entregado' || comanda.estado === 'Cancelado'"
-                :class="{ disabled: comanda.estado === 'Entregado' || comanda.estado === 'Cancelado' }"
-                @click="updateComanda(comanda.id, comanda.estado)"
-              >
-                Actualizar
-              </button>
+              <button @click="updateComanda(comanda.id, comanda.estado)">Actualizar</button>
             </td>
           </tr>
         </tbody>
