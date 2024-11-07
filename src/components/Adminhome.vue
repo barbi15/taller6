@@ -13,8 +13,8 @@
       <!-- Botones de cerrar sesión y Verificación de Stock -->
       <div class="button-group">
         <button @click="verificarStock" class="button-stock">Verificar Stock</button>
-        <button @click="cerrarSesion" class="button-logout">Cerrar Sesión</button>
         <button @click="irAUsuarios" class="button-gestion">Gestionar Usuarios</button>
+        <button @click="cerrarSesion" class="button-logout">Cerrar Sesión</button>
       </div>
     </div>
 
@@ -198,8 +198,9 @@ export default {
     this.tasaDolar = response.data.rates.ARS; // Guardar la tasa en `tasaDolar`
     alert(`Cotización actual del dólar: $${this.tasaDolar}`);
   } catch (error) {
+    // Aquí puedes manejar el error de manera más detallada
     console.error('Error al obtener la cotización del dólar:', error);
-   alert('Error al obtener la cotización del dólar');
+    alert('Hubo un error al obtener la cotización del dólar. Por favor, inténtelo más tarde.');
   }
 },
     verificarStock() {

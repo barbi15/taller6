@@ -117,6 +117,7 @@ export default {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((response) => {
+          console.log(response.data);  // Imprimir los datos para verificar qué llega
           // Filtrar las comandas para que solo se vean las que tienen el estado 'Procesandose'
           this.comandas = response.data.filter(comanda => comanda.estado === 'Procesandose');
         })

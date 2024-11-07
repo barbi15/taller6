@@ -43,7 +43,7 @@
   button {
     width: auto;
     padding: 10px;
-    background-color: #0f3762;
+    background-color: #1dae4b;
     color: white;
     border: none;
     border-radius: 5px;
@@ -56,7 +56,7 @@
   }
   
   button:hover {
-    background-color: #3876a59c;
+    background-color: #8fd0ae;
   }
   /*modificar y act*/
   button[type="button"] {

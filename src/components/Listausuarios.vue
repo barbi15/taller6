@@ -76,7 +76,7 @@
   
       // Método para redirigir al home del admin
       volverAlHome() {
-        this.$router.push({ name: 'adminhome' });
+        this.$router.push('/Adminhome');
       },
     },
   };
