@@ -1,6 +1,12 @@
 <template> 
+  <div class="fondlog-cont">
   <div class="register-container">
     <h2>Registro de Usuario</h2>
+
+    <div class="logo3-container">
+      <img src='../images/logorotiseria.png' alt="Logo" id="logo">
+    </div>
+
     <form @submit.prevent="handleRegister">
       <div class="form-group">
         <label>Usuario:</label>
@@ -17,15 +23,18 @@
       <p v-if="passwordError" class="error">{{ passwordError }}</p>
       <button type="submit">Registrar</button>
     </form>
+    <div class="linkcuenta-cont">
     <p>¿Ya tienes una cuenta? <router-link to="/login">Inicia sesión aquí</router-link></p>
+  </div>
     <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
     <p v-if="successMessage" class="success">{{ successMessage }}</p>
   </div>
+</div>
 </template>
 
 <script>
 import axios from 'axios';
-
+import '../styles/Estilo1.css';
 export default {
   data() {
     return {

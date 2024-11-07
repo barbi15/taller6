@@ -1,22 +1,29 @@
+.fondo-cont {
+  background-image: url('../images/loginfondo.jpeg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 100vh; /* Asegura que el fondo cubra toda la pantalla */
 
+}
 .cook-profile {
   max-width: 400px;
-  margin: 50px auto;
     padding: 20px;
+    margin: auto;
     border-radius: 10px;
-    background-color: #857c7ca2; 
-    color: #ffffff; 
+    background-color: #fff4f4a2; 
+    color: #0e0707; 
   }
   /*titulo*/
   h2 {
     text-align: center;
     margin-bottom: 20px;
-    color: #2a2626; /* Título en blanco */
+    color: #1b1919; 
   }
   
   
   p {
-    color: #1b1919; /* Texto de datos del usuario en blanco */
+    color: #2f2a2a; /* Texto de datos del usuario en blanco */
     padding: 8px;
     border-radius: 3px;
   }
@@ -29,10 +36,10 @@
     margin-top: 5px;
     border: 1px solid #555; /* Borde gris oscuro */
     border-radius: 3px;
-    color: #1b1919; /* Texto de datos del usuario en blanco */
+    color: #1b1919; 
     background-color: #e2e2e2;
   }
-  /*guardr cambios y volver*/
+  /*volver*/
   button {
     width: auto;
     padding: 10px;

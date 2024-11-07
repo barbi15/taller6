@@ -70,7 +70,9 @@ input {
   text-align: center;
 }
 
-
+.no-products-message{
+  color :white;
+}
 .stock-add-product-section {
   display: flex;
   gap: 15px;

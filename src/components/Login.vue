@@ -1,5 +1,7 @@
 <template>
     
+    <div class="fondlog-cont">
+
   <div class="login1-container">
     <h1 class="login-title">Rotiseria La Triada</h1>
    
@@ -23,6 +25,7 @@
     <p>¿No tienes cuenta? <router-link to="/register">Regístrate aquí</router-link></p>
     <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
   </div>
+</div>
 </template>
 
 <script>

@@ -2,13 +2,17 @@
   <div class="cocinero-home">
     <h1>Pantalla del Cocinero</h1>
 
+    <div class="logo3-container">
+      <img src='../images/logorotiseria.png' alt="Logo" id="logo">
+    </div>
     <div class="top-buttons">
       <button @click="irAPerfilCocinero" class="perfil-button">Ver Perfil</button>
       <button @click="cerrarSesion" class="cerrarsesion-button">Cerrar Sesión</button>
     </div>
 
+    <div class="title-comanda">
     <h2>Lista de Comandas</h2>
-
+</div>
     <div class="tabla-container">
       <table class="comandas-table">
         <thead>
@@ -78,10 +82,19 @@ export default {
       },
       mostrarDetalles: false,
       errorMessage: '',
+      autoUpdateInterval: null, // Variable para almacenar el intervalo de actualización automática
     };
   },
   mounted() {
     this.getComandas();
+    // Iniciar la actualización automática cada 10 segundos
+    this.autoUpdateInterval = setInterval(this.getComandas, 10000); // 10000 ms = 10 segundos
+  },
+  beforeDestroy() {
+    // Limpiar el intervalo cuando el componente se destruya
+    if (this.autoUpdateInterval) {
+      clearInterval(this.autoUpdateInterval);
+    }
   },
   methods: {
     irAPerfilCocinero() {
@@ -104,9 +117,9 @@ export default {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((response) => {
-      // Filtrar las comandas para que solo se vean las que tienen el estado 'Procesandose'
-      this.comandas = response.data.filter(comanda => comanda.estado === 'Procesandose');
-    })
+          // Filtrar las comandas para que solo se vean las que tienen el estado 'Procesandose'
+          this.comandas = response.data.filter(comanda => comanda.estado === 'Procesandose');
+        })
         .catch((error) => {
           this.errorMessage = 'Error al obtener las comandas: ' + error.message;
           console.error('Error al obtener las comandas:', error);
@@ -136,35 +149,27 @@ export default {
       this.detallesComanda = { id: null, productos: [] };
     },
     async updateComanda(comandaId, newState) {
-  const token = localStorage.getItem('token');
-  const payload = { estado: newState };
+      const token = localStorage.getItem('token');
+      const payload = { estado: newState };
 
-  try {
-    // Realizar la petición PUT para actualizar el estado de la comanda
-    await axios.put(
-      `https://rotiserialatriada-dgjb.onrender.com/api/comandas/${comandaId}`,
-      payload,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+      try {
+        // Realizar la petición PUT para actualizar el estado de la comanda
+        await axios.put(
+          `https://rotiserialatriada-dgjb.onrender.com/api/comandas/${comandaId}`,
+          payload,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
 
-    // Mostrar mensaje de éxito al usuario
-    alert(`Estado de la comanda actualizado a: ${newState}`);
+        // Mostrar mensaje de éxito al usuario
+        alert(`Estado de la comanda actualizado a: ${newState}`);
 
-    // Actualizar la lista de comandas eliminando la comanda actualizada si ya no está en "Procesandose"
-    if (newState !== 'Procesandose') {
-      this.comandas = this.comandas.filter(comanda => comanda.id !== comandaId);
-    } else {
-      // Si el estado sigue siendo "Procesandose", actualizar su valor en la lista de comandas
-      const comandaIndex = this.comandas.findIndex(comanda => comanda.id === comandaId);
-      if (comandaIndex !== -1) {
-        this.comandas[comandaIndex].estado = newState;
+        // Llamar a getComandas() para recargar la lista completa de comandas
+        await this.getComandas();
+      } catch (error) {
+        this.errorMessage = 'Error al actualizar la comanda: ' + error.message;
+        console.error(`Error al actualizar la comanda ${comandaId}:`, error);
       }
-    }
-  } catch (error) {
-    this.errorMessage = 'Error al actualizar la comanda: ' + error.message;
-    console.error(`Error al actualizar la comanda ${comandaId}:`, error);
-  }
-},
+    },
     formatDate(dateString) {
       const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
       return new Date(dateString).toLocaleDateString(undefined, options);

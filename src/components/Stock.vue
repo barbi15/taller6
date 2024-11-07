@@ -58,6 +58,8 @@
             </div>
           </li>
         </ul>
+        <!-- Mensaje cuando no se encuentran productos -->
+  <p v-if="filteredProducts.length === 0" class="no-products-message">No se encontraron productos con ese nombre.</p>
       </div>
 
       <!-- Botón de volver -->

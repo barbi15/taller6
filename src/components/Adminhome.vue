@@ -38,6 +38,7 @@
               </div>
             </li>
           </ul>
+          <p v-if="productosFiltrados.length === 0" class="no-productos-message">No se encontraron productos con ese nombre.</p>
         </div>
       </div>
 

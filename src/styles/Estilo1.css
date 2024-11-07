@@ -1,15 +1,25 @@
 /* Estilos globales login y registro */
+.fondlog-cont {
+  background-image: url('../images/loginfondo.jpeg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 100vh; /* Asegura que el fondo cubra toda la pantalla */
+
+}
   .login1-container,
   .register-container {
     width: 350px;
     margin: auto;
     padding: 10px;
     border-radius: 5px;
-    background: rgba(59, 66, 64, 0.669); /* Fondo semitransparente similar al del login */
+    background: rgba(211, 214, 213, 0.669); /* Fondo semitransparente similar al del login */
     box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
     text-align: center;
   }
-  
+  .linkcuenta-cont p {
+    color: rgb(70, 67, 67);
+  }
    .logo-container img {
     width: 100px;
     height: 100px;
@@ -27,13 +37,12 @@
     font-size: 24px;
     margin-bottom: 20px;
   } 
-  .logo1-container {
+  .logo3-container {
     text-align: center;
     margin-bottom: 5px;
   
   }
-
-  .logo1-container img {
+  .logo3-container img {
     width: 100px;
     height: 100px;
     border-radius: 50%;

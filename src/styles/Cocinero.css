@@ -93,4 +93,9 @@
     border-radius: 5px;
     display: inline-block;
   }
-  
+  .title-comanda h2{
+    display: inline-block;
+    border-radius: 5px;
+    padding: 5px;
+    background-color: rgba(255, 252, 252, 0.801); /* Fondo blanco semitransparente */
+  }
