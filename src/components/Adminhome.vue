@@ -195,10 +195,10 @@ export default {
   try {
     const response = await axios.get('https://api.exchangerate-api.com/v4/latest/USD');
     this.tasaDolar = response.data.rates.ARS; // Guardar la tasa en `tasaDolar`
-    alert(`Cotización actual del dólar: $${this.tasaDolar}`);
+   /* alert(`Cotización actual del dólar: $${this.tasaDolar}`);*/
   } catch (error) {
     console.error('Error al obtener la cotización del dólar:', error);
-    alert('Error al obtener la cotización del dólar');
+   /* alert('Error al obtener la cotización del dólar');*/
   }
 },
     verificarStock() {
