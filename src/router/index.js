@@ -5,6 +5,7 @@ import CocineroHome from '../components/Cocinerohome.vue';
 import Adminhome from '../components/Adminhome.vue';
 import Stock from '../components/Stock.vue';
 import Cocineroperfil from '@/components/Cocineroperfil.vue';
+import Listausuarios from '@/components/Listausuarios.vue';
 const routes = [
   { path: '/', redirect: '/login' }, // Redirecciona la ruta base al login
   { path: '/login', name: 'Login', component: Login }, // Ruta para la pantalla de Login
@@ -12,7 +13,8 @@ const routes = [
   { path: '/Adminhome', component: Adminhome },//Ruta para la pantalla de administrador
   { path: '/cocinerohome',name: 'Cocinerohome', component: CocineroHome },//Ruta para la pantalla de cocinero
   { path: '/stock', name: 'Stock', component: Stock },
-  { path: '/cocineroperfil', name: 'Cocineroperfil', component: Cocineroperfil }
+  { path: '/cocineroperfil', name: 'Cocineroperfil', component: Cocineroperfil },
+  { path: '/listausuarios', name: 'ListaUsuarios', component: Listausuarios },
 ];
 
 const router = createRouter({

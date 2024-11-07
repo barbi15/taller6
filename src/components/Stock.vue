@@ -1,7 +1,5 @@
 <template>
   <div class="logo2-container">
-   
-    <!-- Aquí aplicamos la nueva clase -->
     <div class="stock-page-background">
       <div class="stock-management-container">
         <img src='../images/logorotiseria.png' alt="Logo" id="logo">
@@ -54,12 +52,11 @@
               <button @click="updateStock(product, -1)" class="stock-adjust-button">-</button>
               <span class="stock-quantity-display">{{ product.stock }}</span>
               <button @click="updateStock(product, 1)" class="stock-adjust-button">+</button>
+              <button @click="updatePrice(product)" class="stock-adjust-button5">Actualizar Precio</button>
               <button @click="eliminarProducto(product.id)" class="stock-delete-button">Eliminar</button>
             </div>
           </li>
         </ul>
-        <!-- Mensaje cuando no se encuentran productos -->
-  <p v-if="filteredProducts.length === 0" class="no-products-message">No se encontraron productos con ese nombre.</p>
       </div>
 
       <!-- Botón de volver -->
@@ -135,6 +132,34 @@ export default {
         .catch((error) => {
           console.error('Error al actualizar el stock:', error);
         });
+    },
+
+    // Actualiza el precio de un producto
+    updatePrice(product) {
+      const nuevoPrecio = prompt("Ingrese el nuevo precio para el producto", product.precio);
+      if (nuevoPrecio && !isNaN(nuevoPrecio) && nuevoPrecio > 0) {
+        const token = localStorage.getItem('token');
+        const updatedProduct = {
+          nombre: product.nombre,
+          precio: parseFloat(nuevoPrecio),
+          stock: product.stock,
+        };
+
+        axios
+          .put(`https://rotiserialatriada-dgjb.onrender.com/api/productos/${product.id}`, updatedProduct, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+          .then(() => {
+            product.precio = parseFloat(nuevoPrecio);
+            console.log(`Precio actualizado: ${product.nombre} - $${product.precio}`);
+            this.getProducts(); // Actualiza la lista de productos
+          })
+          .catch((error) => {
+            console.error('Error al actualizar el precio:', error);
+          });
+      } else {
+        alert('El precio ingresado no es válido.');
+      }
     },
 
     // Agrega un nuevo producto al backend

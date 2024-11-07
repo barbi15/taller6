@@ -48,4 +48,4 @@ function handleError(error) {
 }
 
 // Exportar las funciones que se utilizan en los componentes
-export { register, login, getToken }; //
+export { register, login, getToken, eliminaruUsuario }; //

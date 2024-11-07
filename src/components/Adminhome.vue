@@ -14,6 +14,7 @@
       <div class="button-group">
         <button @click="verificarStock" class="button-stock">Verificar Stock</button>
         <button @click="cerrarSesion" class="button-logout">Cerrar Sesión</button>
+        <button @click="irAUsuarios" class="button-gestion">Gestionar Usuarios</button>
       </div>
     </div>
 
@@ -38,8 +39,7 @@
               </div>
             </li>
           </ul>
-          <p v-if="productosFiltrados.length === 0" class="no-productos-message">No se encontraron productos con ese nombre.</p>
-        </div>
+                </div>
       </div>
 
       <!-- Columna derecha: Comanda actual -->
@@ -205,6 +205,9 @@ export default {
     verificarStock() {
       this.$router.push('/stock');
     },
+    irAUsuarios() {
+      this.$router.push('/listausuarios'); // Redirige a la pantalla de gestión de usuarios
+    },
     aumentarCantidad(producto) {
       if (producto.stock === 0) {
         this.mostrarMensajeStock = true; // Muestra el mensaje de advertencia
@@ -336,45 +339,56 @@ export default {
       }
     },
     async eliminarComanda(id) {
-      try {
-        if (!id) {
-          console.error('Error: id de comanda no definido');
-          alert('Error: id de comanda no definido');
-          return;
-        }
+  try {
+    if (!id) {
+      console.error('Error: id de comanda no definido');
+      alert('Error: id de comanda no definido');
+      return;
+    }
 
-        const token = localStorage.getItem('token');
-        if (!token) throw new Error('Token no encontrado.');
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('Token no encontrado.');
 
-        await axios.delete(`https://rotiserialatriada-dgjb.onrender.com/api/comandas/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+    await axios.delete(`https://rotiserialatriada-dgjb.onrender.com/api/comandas/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
-        this.comandas = this.comandas.filter(comanda => comanda.id !== id);
-        alert('Comanda eliminada correctamente.');
-      } catch (err) {
-        console.error('Error al eliminar comanda:', err);
-        alert('Error al eliminar la comanda.');
-      }
-    },
+    alert('Comanda eliminada correctamente.');
+    
+    // Recargar la lista de comandas para reflejar los cambios
+    await this.obtenerComandas();
+
+  } catch (err) {
+    /*console.error('Error al eliminar comanda:', err);
+    alert('Error al eliminar la comanda.');*/
+  }
+},
     async verDetalleComanda(id) {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) throw new Error('Token no encontrado.');
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('Token no encontrado.');
 
-        const response = await axios.get(
-          `https://rotiserialatriada-dgjb.onrender.com/api/comanda_productos/${id}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+    const response = await axios.get(
+      `https://rotiserialatriada-dgjb.onrender.com/api/comanda_productos/${id}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
 
-        this.detalleProductos = response.data;
-        this.detalleComandaId = id;
-        this.detalleComandaVisible = true;
-      } catch (error) {
-        console.error('Error al obtener el detalle de la comanda:', error);
-        alert('Error al obtener el detalle de la comanda.');
-      }
-    },
+    this.detalleProductos = response.data.map(producto => ({
+      id: producto.id,
+      id_comanda: producto.id_comanda,
+      id_producto: producto.id_producto,
+      cantidad: producto.cantidad,
+      subtotal: producto.subtotal,
+      producto_nombre: producto.producto_nombre
+    }));
+    this.detalleComandaId = id;
+    this.detalleComandaVisible = true;
+  } catch (error) {
+    console.error('Error al obtener el detalle de la comanda:', error);
+    alert('Error al obtener el detalle de la comanda.');
+  }
+},
+
     cerrarDetalleComanda() {
       this.detalleComandaVisible = false;
       this.detalleProductos = [];
