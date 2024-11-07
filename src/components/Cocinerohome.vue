@@ -104,8 +104,9 @@ export default {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((response) => {
-          this.comandas = response.data;
-        })
+      // Filtrar las comandas para que solo se vean las que tienen el estado 'Procesandose'
+      this.comandas = response.data.filter(comanda => comanda.estado === 'Procesandose');
+    })
         .catch((error) => {
           this.errorMessage = 'Error al obtener las comandas: ' + error.message;
           console.error('Error al obtener las comandas:', error);
@@ -135,24 +136,35 @@ export default {
       this.detallesComanda = { id: null, productos: [] };
     },
     async updateComanda(comandaId, newState) {
-      const token = localStorage.getItem('token');
-      const payload = { estado: newState };
+  const token = localStorage.getItem('token');
+  const payload = { estado: newState };
 
-      axios
-        .put(
-          `https://rotiserialatriada-dgjb.onrender.com/api/comandas/${comandaId}`,
-          payload,
-          { headers: { Authorization: `Bearer ${token}` } }
-        )
-        .then((response) => {
-          alert(`Estado de la comanda actualizado a: ${newState}`);
-          this.getComandas();
-        })
-        .catch((error) => {
-          this.errorMessage = 'Error al actualizar la comanda: ' + error.message;
-          console.error(`Error al actualizar la comanda ${comandaId}:`, error);
-        });
-    },
+  try {
+    // Realizar la petición PUT para actualizar el estado de la comanda
+    await axios.put(
+      `https://rotiserialatriada-dgjb.onrender.com/api/comandas/${comandaId}`,
+      payload,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    // Mostrar mensaje de éxito al usuario
+    alert(`Estado de la comanda actualizado a: ${newState}`);
+
+    // Actualizar la lista de comandas eliminando la comanda actualizada si ya no está en "Procesandose"
+    if (newState !== 'Procesandose') {
+      this.comandas = this.comandas.filter(comanda => comanda.id !== comandaId);
+    } else {
+      // Si el estado sigue siendo "Procesandose", actualizar su valor en la lista de comandas
+      const comandaIndex = this.comandas.findIndex(comanda => comanda.id === comandaId);
+      if (comandaIndex !== -1) {
+        this.comandas[comandaIndex].estado = newState;
+      }
+    }
+  } catch (error) {
+    this.errorMessage = 'Error al actualizar la comanda: ' + error.message;
+    console.error(`Error al actualizar la comanda ${comandaId}:`, error);
+  }
+},
     formatDate(dateString) {
       const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
       return new Date(dateString).toLocaleDateString(undefined, options);

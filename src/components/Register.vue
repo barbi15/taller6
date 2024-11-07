@@ -1,4 +1,4 @@
-<template>
+<template> 
   <div class="register-container">
     <h2>Registro de Usuario</h2>
     <form @submit.prevent="handleRegister">
@@ -46,21 +46,22 @@ export default {
       this.passwordError = '';
 
       try {
+        // Llamar al endpoint de registro y recibir directamente el token en la respuesta
         const registerResponse = await axios.post('https://taller6-alejo.onrender.com/usuarios', {
           nombre_usuario: this.name,
           correo: this.email,
           contrasena: this.password,
         });
 
-        if (registerResponse.data.success) {
-          const loginResponse = await axios.post('https://taller6-alejo.onrender.com/login', {
-            nombre_usuario: this.name,
-            contrasena: this.password,
-          });
-          const token = loginResponse.data.token;
-          localStorage.setItem('token', token);
-          this.successMessage = 'Registro y login exitosos. Redirigiendo...';
+        if (registerResponse.data.token) {
+          const token = registerResponse.data.token;
 
+          // Guardar el token en localStorage
+          localStorage.setItem('token', token);
+
+          this.successMessage = 'Registro exitoso. Redirigiendo...';
+
+          // Redirigir según el tipo de usuario
           if (this.name.toLowerCase().includes('admin')) {
             this.$router.push('/adminhome');
           } else {
@@ -70,7 +71,7 @@ export default {
           this.errorMessage = `Error en el registro: ${registerResponse.data.message}`;
         }
       } catch (error) {
-        console.error("Error en registro o login:", error);
+        console.error("Error en el registro:", error);
         this.errorMessage = `Hubo un error: ${error.response?.data?.message || error.message || 'Error desconocido'}`;
         this.successMessage = '';
       }
