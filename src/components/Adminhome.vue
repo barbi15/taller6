@@ -39,7 +39,7 @@
               </div>
             </li>
           </ul>
-                </div>
+       </div>
       </div>
 
       <!-- Columna derecha: Comanda actual -->
@@ -167,31 +167,37 @@ export default {
       this.$router.push('/login');
     },
     async obtenerProductos() {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) throw new Error('Token no encontrado.');
-        const response = await axios.get('https://rotiserialatriada-dgjb.onrender.com/api/productos', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        this.productos = response.data.map(producto => ({
-          ...producto,
-          cantidad: 0,
-        }));
-      } catch (err) {
-        console.error('Error al obtener productos:', err);
-        this.error = 'Error al obtener productos.';
-      }
-    },
-    obtenerNombreProducto(id_producto) {
-      const producto = this.productos.find(p => p.id === id_producto);
-      return producto ? producto.nombre : 'Producto desconocido';
-    },
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('Token no encontrado.');
+
+    const response = await axios.get('https://rotiserialatriada-dgjb.onrender.com/api/productos', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    // Manejar el nuevo formato de la respuesta
+    if (response.data && response.data.success && Array.isArray(response.data.data)) {
+      this.productos = response.data.data.map(producto => ({
+        ...producto,
+        cantidad: 0
+      }));
+    } else {
+      console.error('Formato de respuesta inesperado:', response.data);
+      this.error = 'Error al obtener productos. Formato de respuesta no válido.';
+    }
+  } catch (err) {
+    console.error('Error al obtener productos:', err);
+    this.error = 'Error al obtener productos.';
+  }
+},
+obtenerNombreProducto(id_producto) {
+  const producto = this.productos.find(p => p.id === id_producto);
+  return producto ? producto.nombre : 'Producto desconocido';
+},
     obtenerPrecioProducto(id_producto) {
-      const producto = this.productos.find(p => p.id === id_producto);
-      return producto ? producto.precio : 0;
-    },
+  const producto = this.productos.find(p => p.id === id_producto);
+  return producto ? parseFloat(producto.precio) : 0;
+},
     async obtenerCotizacionDolar() {
   try {
     const response = await axios.get('https://api.exchangerate-api.com/v4/latest/USD');
@@ -270,14 +276,14 @@ export default {
     }
   }
 },
-    eliminarProductoDeComanda(index) {
-      const producto = this.comandaProductos[index];
-      const productoOriginal = this.productos.find(p => p.id === producto.id_producto);
-      if (productoOriginal) {
-        productoOriginal.cantidad = 0;
-      }
-      this.comandaProductos.splice(index, 1);
-    },
+eliminarProductoDeComanda(index) {
+  const producto = this.comandaProductos[index];
+  const productoOriginal = this.productos.find(p => p.id === producto.id_producto);
+  if (productoOriginal) {
+    productoOriginal.cantidad = 0;
+  }
+  this.comandaProductos.splice(index, 1);
+},
     async confirmarComanda() {
   try {
     const token = localStorage.getItem('token');
@@ -296,50 +302,64 @@ export default {
       { headers: { Authorization: `Bearer ${token}` } }
     );
 
-    const nuevaComanda = {
-      id: response.data.id,
-      precio_total: response.data.precio_total || this.calcularPrecioTotal(comandaData.productos),
-      estado: response.data.estado || 'En proceso',
-    };
+    if (response.data && response.data.success) {
+      const nuevaComanda = {
+        id: response.data.data.id,
+        precio_total: response.data.data.precio_total || this.calcularPrecioTotal(comandaData.productos),
+        estado: response.data.data.estado || 'En proceso',
+      };
 
-    this.comandas.push(nuevaComanda);
-    this.comandaProductos = [];
+      this.comandas.push(nuevaComanda);
+      this.comandaProductos = [];
 
-    comandaData.productos.forEach(p => {
-      const producto = this.productos.find(prod => prod.id === p.id_producto);
-      if (producto) producto.stock -= p.cantidad;
-    });
+      // Actualizar el stock en productos
+      comandaData.productos.forEach(p => {
+        const producto = this.productos.find(prod => prod.id === p.id_producto);
+        if (producto) producto.stock -= p.cantidad;
+      });
 
-    alert("Comanda confirmada exitosamente.");
+      alert("Comanda confirmada exitosamente.");
 
-    // Llama a las funciones para actualizar los productos y comandas automáticamente
-    await this.obtenerProductos();
-    await this.obtenerComandas();
-
+      // Actualizar los datos después de confirmar la comanda
+      await this.obtenerProductos();
+      await this.obtenerComandas();
+    } else {
+      console.error('Error al confirmar la comanda:', response.data);
+      alert('Error al confirmar la comanda.');
+    }
   } catch (error) {
+    console.error('Error al confirmar la comanda:', error);
     alert('Error al confirmar la comanda.');
   }
 },
-    calcularPrecioTotal(productos) {
-      return productos.reduce((total, producto) => {
-        const item = this.productos.find(p => p.id === producto.id_producto);
-        return item ? total + item.precio * producto.cantidad : total;
-      }, 0);
-    },
+calcularPrecioTotal(productos) {
+  return productos.reduce((total, producto) => {
+    const item = this.productos.find(p => p.id === producto.id_producto);
+    return item ? total + parseFloat(item.precio) * producto.cantidad : total;
+  }, 0);
+},
     async obtenerComandas() {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) throw new Error('Token no encontrado.');
-        const response = await axios.get('https://rotiserialatriada-dgjb.onrender.com/api/comandas', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        this.comandas = response.data;
-      } catch (err) {
-        console.error('Error al obtener comandas:', err);
-        this.error = 'Error al obtener comandas.';
-      }
-    },
-    async eliminarComanda(id) {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('Token no encontrado.');
+
+    const response = await axios.get('https://rotiserialatriada-dgjb.onrender.com/api/comandas', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    // Adaptar para el nuevo formato de respuesta
+    if (response.data && response.data.success && Array.isArray(response.data.data)) {
+      this.comandas = response.data.data;
+    } else {
+      console.error('Formato de respuesta inesperado:', response.data);
+      this.error = 'Error al obtener comandas. Formato de respuesta no válido.';
+    }
+  } catch (err) {
+    console.error('Error al obtener comandas:', err);
+    this.error = 'Error al obtener comandas.';
+  }
+},
+async eliminarComanda(id) {
   try {
     if (!id) {
       console.error('Error: id de comanda no definido');
@@ -350,21 +370,23 @@ export default {
     const token = localStorage.getItem('token');
     if (!token) throw new Error('Token no encontrado.');
 
-    await axios.delete(`https://rotiserialatriada-dgjb.onrender.com/api/comandas/${id}`, {
+    const response = await axios.delete(`https://rotiserialatriada-dgjb.onrender.com/api/comandas/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    alert('Comanda eliminada correctamente.');
-    
-    // Recargar la lista de comandas para reflejar los cambios
-    await this.obtenerComandas();
-
+    if (response.data && response.data.success) {
+      alert('Comanda eliminada correctamente.');
+      await this.obtenerComandas();
+    } else {
+      console.error('Error al eliminar comanda:', response.data);
+      alert('Error al eliminar la comanda.');
+    }
   } catch (err) {
-    /*console.error('Error al eliminar comanda:', err);
-    alert('Error al eliminar la comanda.');*/
+    console.error('Error al eliminar comanda:', err);
+    alert('Error al eliminar la comanda.');
   }
 },
-    async verDetalleComanda(id) {
+async verDetalleComanda(id) {
   try {
     const token = localStorage.getItem('token');
     if (!token) throw new Error('Token no encontrado.');
@@ -374,22 +396,27 @@ export default {
       { headers: { Authorization: `Bearer ${token}` } }
     );
 
-    this.detalleProductos = response.data.map(producto => ({
-      id: producto.id,
-      id_comanda: producto.id_comanda,
-      id_producto: producto.id_producto,
-      cantidad: producto.cantidad,
-      subtotal: producto.subtotal,
-      producto_nombre: producto.producto_nombre
-    }));
-    this.detalleComandaId = id;
-    this.detalleComandaVisible = true;
+    // Adaptar para el nuevo formato de respuesta
+    if (response.data && response.data.success && Array.isArray(response.data.data)) {
+      this.detalleProductos = response.data.data.map(producto => ({
+        id: producto.id,
+        id_comanda: producto.id_comanda,
+        id_producto: producto.id_producto,
+        cantidad: producto.cantidad,
+        subtotal: producto.subtotal,
+        producto_nombre: producto.producto_nombre
+      }));
+      this.detalleComandaId = id;
+      this.detalleComandaVisible = true;
+    } else {
+      console.error('Formato de respuesta inesperado:', response.data);
+      alert('Error al obtener el detalle de la comanda.');
+    }
   } catch (error) {
     console.error('Error al obtener el detalle de la comanda:', error);
     alert('Error al obtener el detalle de la comanda.');
   }
 },
-
     cerrarDetalleComanda() {
       this.detalleComandaVisible = false;
       this.detalleProductos = [];

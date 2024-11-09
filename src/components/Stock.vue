@@ -93,153 +93,209 @@ export default {
   },
   methods: {
     getProducts() {
-      const token = localStorage.getItem('token');
-      axios
-        .get('https://rotiserialatriada-dgjb.onrender.com/api/productos', {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        .then((response) => {
-          this.products = response.data;
-        })
-        .catch((error) => {
-          console.error('Error al obtener productos:', error);
-        });
-    },
-
-    // Actualiza el stock de un producto
-    updateStock(product, change) {
-      if (product.stock + change < 0) {
-        alert('El stock no puede ser menor a cero.');
-        return;
-      }
-
-      const token = localStorage.getItem('token');
-      const updatedProduct = {
-        nombre: product.nombre,
-        precio: product.precio,
-        stock: product.stock + change,
-      };
-
-      axios
-        .put(`https://rotiserialatriada-dgjb.onrender.com/api/productos/${product.id}`, updatedProduct, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        .then(() => {
-          product.stock += change;
-          console.log(`Stock actualizado: ${product.nombre} - ${product.stock}`);
-          this.getProducts(); // Actualiza la lista de productos
-        })
-        .catch((error) => {
-          console.error('Error al actualizar el stock:', error);
-        });
-    },
-
-    // Actualiza el precio de un producto
-    updatePrice(product) {
-      const nuevoPrecio = prompt("Ingrese el nuevo precio para el producto", product.precio);
-      if (nuevoPrecio && !isNaN(nuevoPrecio) && nuevoPrecio > 0) {
-        const token = localStorage.getItem('token');
-        const updatedProduct = {
-          nombre: product.nombre,
-          precio: parseFloat(nuevoPrecio),
-          stock: product.stock,
-        };
-
-        axios
-          .put(`https://rotiserialatriada-dgjb.onrender.com/api/productos/${product.id}`, updatedProduct, {
-            headers: { Authorization: `Bearer ${token}` },
-          })
-          .then(() => {
-            product.precio = parseFloat(nuevoPrecio);
-            console.log(`Precio actualizado: ${product.nombre} - $${product.precio}`);
-            this.getProducts(); // Actualiza la lista de productos
-          })
-          .catch((error) => {
-            console.error('Error al actualizar el precio:', error);
-          });
+  const token = localStorage.getItem('token');
+  axios
+    .get('https://rotiserialatriada-dgjb.onrender.com/api/productos', {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    .then((response) => {
+      // Verifica si el objeto tiene la propiedad "data" antes de asignar los productos
+      if (response.data && response.data.success && Array.isArray(response.data.data)) {
+        this.products = response.data.data;
       } else {
-        alert('El precio ingresado no es válido.');
+        console.error('Formato de respuesta inesperado:', response.data);
+        alert('Error al obtener productos. Formato de respuesta no válido.');
       }
-    },
+    })
+    .catch((error) => {
+      console.error('Error al obtener productos:', error);
+      alert('Error al obtener productos.');
+    });
+},
+updateStock(product, change) {
+  if (product.stock + change < 0) {
+    alert('El stock no puede ser menor a cero.');
+    return;
+  }
 
-    // Agrega un nuevo producto al backend
-    agregarProducto() {
-      if (
-        !this.newProductName || 
-        isNaN(this.newProductPrice) || 
-        this.newProductPrice <= 0 || 
-        isNaN(this.newProductStock) || 
-        this.newProductStock <= 0
-      ) {
-        alert('Por favor, complete todos los campos con valores numéricos válidos.');
-        return;
+  const token = localStorage.getItem('token');
+  const updatedProduct = {
+    nombre: product.nombre,
+    precio: product.precio,
+    stock: product.stock + change,
+  };
+
+  axios
+    .put(`https://rotiserialatriada-dgjb.onrender.com/api/productos/${product.id}`, updatedProduct, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    .then((response) => {
+      if (response.data && response.data.success) {
+        product.stock += change;
+        this.getProducts(); // Actualiza la lista de productos
+      } else {
+        console.error('Error al actualizar el stock:', response.data);
+        alert('Error al actualizar el stock.');
       }
+    })
+    .catch((error) => {
+      console.error('Error al actualizar el stock:', error);
+      alert('Error al actualizar el stock.');
+    });
+},
+updatePrice(product) {
+  const nuevoPrecio = prompt("Ingrese el nuevo precio para el producto", product.precio);
+  
+  // Verifica si el usuario ingresó un precio válido
+  if (nuevoPrecio && !isNaN(nuevoPrecio) && parseFloat(nuevoPrecio) > 0) {
+    const token = localStorage.getItem('token');
 
-      const nuevoProducto = {
-        nombre: this.newProductName,
-        precio: parseFloat(this.newProductPrice.toFixed(2)), // Asegura formato decimal
-        stock: this.newProductStock,
-      };
+    // Verifica si el token existe antes de proceder
+    if (!token) {
+      alert('Token no encontrado. Por favor, inicie sesión nuevamente.');
+      return;
+    }
 
-      const token = localStorage.getItem('token');
-      axios
-        .post('https://rotiserialatriada-dgjb.onrender.com/api/productos', nuevoProducto, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        .then((response) => {
-          this.products.push(response.data);
-          this.newProductName = '';
-          this.newProductPrice = 0;
-          this.newProductStock = 0;
-          alert('Producto agregado exitosamente.');
-          this.getProducts(); // Actualiza la lista de productos
-        })
-        .catch((error) => {
-          console.error('Error al agregar el producto:', error);
-        });
-    },
+    // Datos del producto para enviar al backend
+    const updatedProduct = {
+      nombre: product.nombre,
+      precio: parseFloat(nuevoPrecio),
+      stock: product.stock,
+    };
 
-    // Elimina un producto del backend
-    eliminarProducto(productId) {
-      const token = localStorage.getItem('token');
-      axios
-        .delete(`https://rotiserialatriada-dgjb.onrender.com/api/productos/${productId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        .then(() => {
-          this.products = this.products.filter(product => product.id !== productId);
-          alert('Producto eliminado exitosamente.');
-        })
-        .catch((error) => {
-          console.error('Error al eliminar el producto:', error);
-        });
-    },
+    // Realiza la petición al backend para actualizar el precio
+    axios.put(
+      `https://rotiserialatriada-dgjb.onrender.com/api/productos/${product.id}`,
+      updatedProduct,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    )
+    .then((response) => {
+      // Verifica si la respuesta es exitosa
+      if (response.data && response.data.success) {
+        product.precio = parseFloat(nuevoPrecio);
+        alert(`Precio actualizado a $${nuevoPrecio} exitosamente.`);
+        this.getProducts(); // Actualiza la lista de productos
+      } else {
+        console.error('Error al actualizar el precio:', response.data);
+        alert('Error al actualizar el precio.');
+      }
+    })
+    .catch((error) => {
+      console.error('Error al actualizar el precio:', error);
+      if (error.response && error.response.status === 401) {
+        alert('No autorizado. Por favor, inicie sesión nuevamente.');
+      } else {
+        alert('Error al actualizar el precio. Intente nuevamente.');
+      }
+    });
+  } else {
+    alert('El precio ingresado no es válido.');
+  }
+},
+agregarProducto() {
+  if (
+    !this.newProductName ||
+    isNaN(this.newProductPrice) || this.newProductPrice <= 0 ||
+    isNaN(this.newProductStock) || this.newProductStock <= 0
+  ) {
+    alert('Por favor, complete todos los campos con valores numéricos válidos.');
+    return;
+  }
 
+  const nuevoProducto = {
+    nombre: this.newProductName,
+    precio: parseFloat(this.newProductPrice.toFixed(2)),
+    stock: this.newProductStock,
+  };
+
+  const token = localStorage.getItem('token');
+  axios
+    .post('https://rotiserialatriada-dgjb.onrender.com/api/productos', nuevoProducto, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    .then((response) => {
+      if (response.data && response.data.success) {
+        this.getProducts(); // Actualiza la lista de productos
+        alert('Producto agregado exitosamente.');
+      } else {
+        console.error('Error al agregar producto:', response.data);
+        alert('Error al agregar producto.');
+      }
+    })
+    .catch((error) => {
+      console.error('Error al agregar el producto:', error);
+      alert('Error al agregar producto.');
+    });
+},
+eliminarProducto(productId) {
+  const token = localStorage.getItem('token');
+  axios
+    .delete(`https://rotiserialatriada-dgjb.onrender.com/api/productos/${productId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    .then((response) => {
+      if (response.data && response.data.success) {
+        this.products = this.products.filter(product => product.id !== productId);
+        alert('Producto eliminado exitosamente.');
+        this.getProducts(); // Actualiza la lista de productos
+      } else {
+        console.error('Error al eliminar producto:', response.data);
+        alert('Error al eliminar producto.');
+      }
+    })
+    .catch((error) => {
+      console.error('Error al eliminar el producto:', error);
+      alert('Error al eliminar producto.');
+    });
+},
     // Guarda cambios en productos nuevos y actualizaciones de stock
     guardarCambios() {
-      const token = localStorage.getItem('token');
-      const updatePromises = this.products.map((product) => {
-        const productData = {
-          nombre: product.nombre,
-          precio: product.precio,
-          stock: product.stock,
-        };
-        
-        if (product.id) {
-          // Actualiza productos existentes
-          return axios.put(
-            `https://rotiserialatriada-dgjb.onrender.com/api/productos/${product.id}`,
-            productData,
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
+  const token = localStorage.getItem('token');
+  if (!token) {
+    alert('Token no encontrado. Por favor, inicie sesión nuevamente.');
+    return;
+  }
+
+  const updatePromises = this.products.map((product) => {
+    const productData = {
+      nombre: product.nombre,
+      precio: parseFloat(product.precio), // Asegura que sea un número
+      stock: product.stock,
+    };
+
+    // Si el producto ya tiene un ID, actualiza el producto
+    if (product.id) {
+      return axios.put(
+        `https://rotiserialatriada-dgjb.onrender.com/api/productos/${product.id}`,
+        productData,
+        { headers: { Authorization: `Bearer ${token}` } }
+      ).then(response => {
+        if (response.data && response.data.success) {
+          return response.data.data; // Retorna el producto actualizado
         } else {
-          // Crea productos nuevos
-          return axios.post('https://rotiserialatriada-dgjb.onrender.com/api/productos', productData, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
+          throw new Error('Error al actualizar el producto');
         }
       });
-
+    } else {
+      // Si no tiene un ID, crea un nuevo producto
+      return axios.post(
+        'https://rotiserialatriada-dgjb.onrender.com/api/productos',
+        productData,
+        { headers: { Authorization: `Bearer ${token}` } }
+      ).then(response => {
+        if (response.data && response.data.success) {
+          return response.data.data; // Retorna el nuevo producto creado
+        } else {
+          throw new Error('Error al crear el producto');
+        }
+      });
+    }
+  });
       Promise.all(updatePromises)
         .then(() => {
           alert('Cambios guardados exitosamente.');
