@@ -11,8 +11,8 @@
     </div>
 
     <div class="title-comanda">
-    <h2>Lista de Comandas</h2>
-</div>
+      <h2>Lista de Comandas</h2>
+    </div>
     <div class="tabla-container">
       <table class="comandas-table">
         <thead>
@@ -53,7 +53,7 @@
       <h3>Detalles de la Comanda {{ detallesComanda.id }}</h3>
       <ul>
         <li v-for="producto in detallesComanda.productos" :key="producto.id">
-          {{ producto.producto_nombre }} - Cantidad: {{ producto.cantidad }}
+          ID Producto: {{ producto.id }} - Cantidad: {{ producto.cantidad }} - Subtotal: ${{ producto.subtotal }}
         </li>
       </ul>
       <button @click="cerrarModal">Cerrar</button>
@@ -113,13 +113,11 @@ export default {
       }
 
       axios
-        .get('https://rotiserialatriada-dgjb.onrender.com/api/comandas', {
+        .get('https://rotiserialatriada-dgjb.onrender.com/api/pedidos', {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((response) => {
-          console.log(response.data);  // Imprimir los datos para verificar qué llega
-          // Filtrar las comandas para que solo se vean las que tienen el estado 'Procesandose'
-          this.comandas = response.data.filter(comanda => comanda.estado === 'Procesandose');
+          this.comandas = response.data.filter(comanda => comanda.estado === 'Pendiente');
         })
         .catch((error) => {
           this.errorMessage = 'Error al obtener las comandas: ' + error.message;
@@ -131,14 +129,11 @@ export default {
         const token = localStorage.getItem('token');
         if (!token) throw new Error('Token no encontrado.');
 
-        const response = await axios.get(`https://rotiserialatriada-dgjb.onrender.com/api/comanda_productos/${comandaId}`, {
+        const response = await axios.get(`https://rotiserialatriada-dgjb.onrender.com/api/pedidos/${comandaId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        this.detallesComanda = {
-          id: comandaId,
-          productos: response.data
-        };
+        this.detallesComanda = response.data;
         this.mostrarDetalles = true;
       } catch (error) {
         this.errorMessage = 'Error al obtener detalles de la comanda: ' + error.message;
@@ -151,12 +146,15 @@ export default {
     },
     async updateComanda(comandaId, newState) {
       const token = localStorage.getItem('token');
-      const payload = { estado: newState };
+      const payload = {
+        pedido_id: comandaId,
+        estado: newState
+      };
 
       try {
         // Realizar la petición PUT para actualizar el estado de la comanda
         await axios.put(
-          `https://rotiserialatriada-dgjb.onrender.com/api/comandas/${comandaId}`,
+          `https://rotiserialatriada-dgjb.onrender.com/api/pedidos/${comandaId}`,
           payload,
           { headers: { Authorization: `Bearer ${token}` } }
         );

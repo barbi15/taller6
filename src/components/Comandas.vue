@@ -38,24 +38,25 @@
     <table>
       <thead>
         <tr>
-          <th>Producto</th>
-          <th>Cantidad</th>
+          <th>Comanda</th>
           <th>Precio Total</th>
+          <th>Estado</th>
           <th>Acciones</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="comanda in comandas" :key="comanda.id">
-          <td>{{ obtenerNombreProducto(comanda.id_producto) }}</td>
-          <td>{{ comanda.cantidad }}</td>
+          <td>{{ comanda.id }}</td>
           <td>{{ comanda.precio_total }}</td>
-          <td><button @click="eliminarComanda(comanda.id)">Eliminar</button></td>
+          <td>{{ comanda.estado }}</td>
+          <td>
+            <button @click="eliminarComanda(comanda.id)">Eliminar</button>
+          </td>
         </tr>
       </tbody>
     </table>
   </div>
 </template>
-
 
 <script>
 import axios from 'axios';
@@ -63,33 +64,147 @@ import axios from 'axios';
 export default {
   data() {
     return {
-      comandas: [] // Arreglo para almacenar las comandas
+      productos: [],
+      comandas: [],
+      comandaProductos: [],
+      nuevaComanda: {
+        id_producto: null,
+        cantidad: 1
+      },
+      error: ''
     };
   },
   mounted() {
-    this.getComandas(); // Llamar a getComandas al montar el componente
+    this.getProductos();
+    this.getComandas();
   },
   methods: {
-    getComandas() {
-      const token = localStorage.getItem('token'); // Recuperar el token de localStorage
-
+    // Obtener productos del backend
+    async getProductos() {
+      const token = localStorage.getItem('token');
       if (!token) {
-        console.error('No se encontró el token. No se puede autenticar la solicitud.');
+        console.error('Token no encontrado.');
         return;
       }
 
-      axios.get('https://rotiserialatriada-dgjb.onrender.com/api/comandas', {
-        headers: {
-          Authorization: `Bearer ${token}` // Incluir el token en la solicitud
+      try {
+        const response = await axios.get('https://rotiserialatriada-dgjb.onrender.com/api/productos', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (response.data && response.data.success) {
+          this.productos = response.data.data.map(producto => ({
+            ...producto,
+            cantidad: 0
+          }));
         }
-      })
-      .then(response => {
-        // Verifica si la respuesta tiene datos y ajusta la estructura según lo esperado
-        this.comandas = response.data;
-      })
-      .catch(error => {
-        console.error('Error al obtener las comandas:', error.response ? error.response.data : error.message);
-      });
+      } catch (error) {
+        console.error('Error al obtener productos:', error);
+      }
+    },
+
+    // Obtener comandas del backend
+    async getComandas() {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('No se encontró el token.');
+        return;
+      }
+
+      try {
+        const response = await axios.get('https://rotiserialatriada-dgjb.onrender.com/api/pedidos', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (response.data && response.data.success) {
+          this.comandas = response.data.data;
+        } else {
+          console.error('Error al obtener las comandas:', response.data);
+        }
+      } catch (error) {
+        console.error('Error al obtener las comandas:', error);
+      }
+    },
+
+    // Agregar productos a la comanda
+    agregarProductoAComanda() {
+      if (this.nuevaComanda.id_producto && this.nuevaComanda.cantidad > 0) {
+        const productoExistente = this.comandaProductos.find(
+          p => p.id_producto === this.nuevaComanda.id_producto
+        );
+
+        if (productoExistente) {
+          productoExistente.cantidad += this.nuevaComanda.cantidad;
+        } else {
+          this.comandaProductos.push({ ...this.nuevaComanda });
+        }
+      }
+    },
+
+    // Confirmar comanda
+    async crearComanda() {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('Token no encontrado. Por favor, inicie sesión.');
+        return;
+      }
+
+      const comandaData = {
+        productos: this.comandaProductos.map(p => ({
+          producto_id: p.id_producto,
+          cantidad: p.cantidad
+        }))
+      };
+
+      try {
+        const response = await axios.post(
+          'https://rotiserialatriada-dgjb.onrender.com/api/pedidos',
+          comandaData,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        if (response.data && response.data.success) {
+          alert('Comanda creada exitosamente.');
+          this.getComandas();
+          this.comandaProductos = [];
+        } else {
+          alert('Error al crear la comanda.');
+        }
+      } catch (error) {
+        console.error('Error al crear comanda:', error);
+        alert('Error al confirmar la comanda.');
+      }
+    },
+
+    // Eliminar comanda
+    async eliminarComanda(id) {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('Token no encontrado.');
+        return;
+      }
+
+      try {
+        const response = await axios.delete(`https://rotiserialatriada-dgjb.onrender.com/api/pedidos/${id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (response.data && response.data.success) {
+          alert('Comanda eliminada exitosamente.');
+          this.getComandas();
+        } else {
+          alert('Error al eliminar la comanda.');
+        }
+      } catch (error) {
+        console.error('Error al eliminar comanda:', error);
+        alert('Error al eliminar la comanda.');
+      }
+    },
+
+    // Obtener nombre del producto por ID
+    obtenerNombreProducto(id_producto) {
+      const producto = this.productos.find(p => p.id === id_producto);
+      return producto ? producto.nombre : 'Producto no encontrado';
     }
   }
 };

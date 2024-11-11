@@ -151,14 +151,14 @@ export default {
       );
     },
     calcularTotalComanda() {
-    return this.comandaProductos.reduce((total, producto) => {
-      const precio = this.obtenerPrecioProducto(producto.id_producto);
-      return total + (precio * producto.cantidad);
-    }, 0);
-  },
+      return this.comandaProductos.reduce((total, producto) => {
+        const precio = this.obtenerPrecioProducto(producto.id_producto);
+        return total + (precio * producto.cantidad);
+      }, 0);
+    },
     totalEnPesos() {
-    return this.calcularTotalComanda * this.tasaDolar;
-  }
+      return this.calcularTotalComanda * this.tasaDolar;
+    }
   },
   methods: {
     cerrarSesion() {
@@ -167,116 +167,135 @@ export default {
       this.$router.push('/login');
     },
     async obtenerProductos() {
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) throw new Error('Token no encontrado.');
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get('https://rotiserialatriada-dgjb.onrender.com/api/productos', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-    const response = await axios.get('https://rotiserialatriada-dgjb.onrender.com/api/productos', {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    // Manejar el nuevo formato de la respuesta
-    if (response.data && response.data.success && Array.isArray(response.data.data)) {
-      this.productos = response.data.data.map(producto => ({
-        ...producto,
-        cantidad: 0
-      }));
-    } else {
-      console.error('Formato de respuesta inesperado:', response.data);
-      this.error = 'Error al obtener productos. Formato de respuesta no válido.';
-    }
-  } catch (err) {
-    console.error('Error al obtener productos:', err);
-    this.error = 'Error al obtener productos.';
-  }
-},
-obtenerNombreProducto(id_producto) {
-  const producto = this.productos.find(p => p.id === id_producto);
-  return producto ? producto.nombre : 'Producto desconocido';
-},
+        if (response.data.success) {
+          this.productos = response.data.data.map(producto => ({
+            ...producto,
+            cantidad: 0
+          }));
+        } else {
+          console.error('Formato de respuesta inesperado:', response.data);
+        }
+      } catch (err) {
+        console.error('Error al obtener productos:', err);
+      }
+    },
+    obtenerNombreProducto(id_producto) {
+      const producto = this.productos.find(p => p.id === id_producto);
+      return producto ? producto.nombre : 'Producto desconocido';
+    },
     obtenerPrecioProducto(id_producto) {
-  const producto = this.productos.find(p => p.id === id_producto);
-  return producto ? parseFloat(producto.precio) : 0;
-},
+      const producto = this.productos.find(p => p.id === id_producto);
+      return producto ? parseFloat(producto.precio) : 0;
+    },
     async obtenerCotizacionDolar() {
-  try {
-    const response = await axios.get('https://api.exchangerate-api.com/v4/latest/USD');
-    this.tasaDolar = response.data.rates.ARS; // Guardar la tasa en `tasaDolar`
-    alert(`Cotización actual del dólar: $${this.tasaDolar}`);
-  } catch (error) {
-    // Aquí puedes manejar el error de manera más detallada
-    console.error('Error al obtener la cotización del dólar:', error);
-    alert('Hubo un error al obtener la cotización del dólar. Por favor, inténtelo más tarde.');
-  }
-},
+      try {
+        const response = await axios.get('https://api.exchangerate-api.com/v4/latest/USD');
+        this.tasaDolar = response.data.rates.ARS;
+      } catch (error) {
+        console.error('Error al obtener la cotización del dólar:', error);
+      }
+    },
     verificarStock() {
       this.$router.push('/stock');
     },
     irAUsuarios() {
-      this.$router.push('/listausuarios'); // Redirige a la pantalla de gestión de usuarios
+      this.$router.push('/listausuarios');
     },
     aumentarCantidad(producto) {
-      if (producto.stock === 0) {
-        this.mostrarMensajeStock = true; // Muestra el mensaje de advertencia
-      } else if (producto.cantidad < producto.stock) {
-        producto.cantidad++;
-        const item = this.comandaProductos.find(p => p.id_producto === producto.id);
-        if (item) {
-          item.cantidad = producto.cantidad;
-        } else {
-          this.comandaProductos.push({
-            id_producto: producto.id,
-            cantidad: producto.cantidad,
-          });
-        }
-      }
-    },
-    cerrarMensajeStock() {
-      this.mostrarMensajeStock = false; // Cierra el modal
-    },
-    reducirCantidad(producto) {
-      if (producto.cantidad > 0) {
-        producto.cantidad--;
-        const item = this.comandaProductos.find(p => p.id_producto === producto.id);
-        if (item) {
-          if (producto.cantidad === 0) {
-            this.eliminarProductoDeComanda(this.comandaProductos.indexOf(item));
-          } else {
-            item.cantidad = producto.cantidad;
-          }
-        }
-      }
-    },
-    actualizarCantidadManual(producto) {
-  // Si el campo está vacío, establece la cantidad en 0 y elimina el producto de la comanda actual.
-  if (producto.cantidad === null || producto.cantidad === "") {
-    producto.cantidad = 0;
-    const index = this.comandaProductos.findIndex(p => p.id_producto === producto.id);
-    if (index !== -1) {
-      this.eliminarProductoDeComanda(index);
-    }
-  } else if (producto.cantidad === 0) {
-    // Si el usuario ingresa 0, muestra un mensaje de advertencia y no actualiza la comanda
-    alert("Ingrese un número mayor o igual a 1.");
-    producto.cantidad = ""; // Limpia el campo de entrada
-  } else if (producto.cantidad > producto.stock) {
-    // Si la cantidad ingresada es mayor que el stock disponible, muestra un mensaje de advertencia y ajusta al stock máximo
-    alert("No hay suficiente stock. La cantidad máxima es " + producto.stock + ".");
-    producto.cantidad = producto.stock; // Limita la cantidad al máximo del stock
-  } else {
-    // Si la cantidad es válida (entre 1 y stock máximo), actualiza o agrega a la comanda actual
-    const item = this.comandaProductos.find(p => p.id_producto === producto.id);
-    if (item) {
-      item.cantidad = producto.cantidad;
+  if (producto.stock > producto.cantidad) {
+    producto.cantidad++;
+    
+    // Buscar si el producto ya está en la comanda
+    const itemEnComanda = this.comandaProductos.find(p => p.id_producto === producto.id);
+
+    if (itemEnComanda) {
+      itemEnComanda.cantidad = producto.cantidad;
     } else {
+      // Si no está, lo añadimos
       this.comandaProductos.push({
         id_producto: producto.id,
+        nombre: producto.nombre,
         cantidad: producto.cantidad,
+        precio: producto.precio
       });
     }
   }
 },
-eliminarProductoDeComanda(index) {
+    cerrarMensajeStock() {
+      this.mostrarMensajeStock = false;
+    },
+    reducirCantidad(producto) {
+  if (producto.cantidad > 0) {
+    producto.cantidad--;
+
+    const itemEnComanda = this.comandaProductos.find(p => p.id_producto === producto.id);
+    if (itemEnComanda) {
+      if (producto.cantidad === 0) {
+        // Si la cantidad llega a 0, lo eliminamos de la comanda
+        this.comandaProductos = this.comandaProductos.filter(p => p.id_producto !== producto.id);
+      } else {
+        itemEnComanda.cantidad = producto.cantidad;
+      }
+    }
+  }
+},
+    actualizarCantidadManual(producto) {
+      if (producto.cantidad > producto.stock) {
+        alert("Cantidad mayor al stock disponible");
+        producto.cantidad = producto.stock;
+      }
+    },
+    async confirmarComanda() {
+      try {
+        const token = localStorage.getItem('token');
+        const comandaData = {
+          productos: this.comandaProductos.map(p => ({
+            producto_id: p.id_producto,
+            cantidad: p.cantidad
+          }))
+        };
+
+        const response = await axios.post(
+          'https://rotiserialatriada-dgjb.onrender.com/api/pedidos',
+          comandaData,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        if (response.data.success) {
+          this.comandas.push({
+            id: response.data.data.id,
+            precio_total: response.data.data.precio_total,
+            estado: response.data.data.estado
+          });
+          this.comandaProductos = [];
+          alert("Comanda confirmada exitosamente.");
+          await this.obtenerProductos();
+          await this.obtenerComandas();
+        } else {
+          alert('Error al confirmar la comanda.');
+        }
+      } catch (error) {
+        console.error('Error al confirmar la comanda:', error);
+      }
+    },
+    async obtenerComandas() {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get('https://rotiserialatriada-dgjb.onrender.com/api/pedidos', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        this.comandas = response.data.data;
+      } catch (err) {
+        console.error('Error al obtener comandas:', err);
+      }
+    },
+    eliminarProductoDeComanda(index) {
   const producto = this.comandaProductos[index];
   const productoOriginal = this.productos.find(p => p.id === producto.id_producto);
   if (productoOriginal) {
@@ -284,149 +303,51 @@ eliminarProductoDeComanda(index) {
   }
   this.comandaProductos.splice(index, 1);
 },
-    async confirmarComanda() {
+    async eliminarComanda(id) {
+      try {
+        const token = localStorage.getItem('token');
+        await axios.delete(`https://rotiserialatriada-dgjb.onrender.com/api/pedidos/${id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        this.comandas = this.comandas.filter(comanda => comanda.id !== id);
+        alert('Comanda eliminada correctamente.');
+      } catch (err) {
+        console.error('Error al eliminar comanda:', err);
+      }
+    },
+    async verDetalleComanda(id) {
   try {
     const token = localStorage.getItem('token');
-    if (!token) throw new Error('Token no encontrado.');
-
-    const comandaData = {
-      productos: this.comandaProductos.map(p => ({
-        id_producto: p.id_producto,
-        cantidad: p.cantidad,
-      })),
-    };
-
-    const response = await axios.post(
-      'https://rotiserialatriada-dgjb.onrender.com/api/comandas',
-      comandaData,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-
-    if (response.data && response.data.success) {
-      const nuevaComanda = {
-        id: response.data.data.id,
-        precio_total: response.data.data.precio_total || this.calcularPrecioTotal(comandaData.productos),
-        estado: response.data.data.estado || 'En proceso',
-      };
-
-      this.comandas.push(nuevaComanda);
-      this.comandaProductos = [];
-
-      // Actualizar el stock en productos
-      comandaData.productos.forEach(p => {
-        const producto = this.productos.find(prod => prod.id === p.id_producto);
-        if (producto) producto.stock -= p.cantidad;
-      });
-
-      alert("Comanda confirmada exitosamente.");
-
-      // Actualizar los datos después de confirmar la comanda
-      await this.obtenerProductos();
-      await this.obtenerComandas();
-    } else {
-      console.error('Error al confirmar la comanda:', response.data);
-      alert('Error al confirmar la comanda.');
-    }
-  } catch (error) {
-    console.error('Error al confirmar la comanda:', error);
-    alert('Error al confirmar la comanda.');
-  }
-},
-calcularPrecioTotal(productos) {
-  return productos.reduce((total, producto) => {
-    const item = this.productos.find(p => p.id === producto.id_producto);
-    return item ? total + parseFloat(item.precio) * producto.cantidad : total;
-  }, 0);
-},
-    async obtenerComandas() {
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) throw new Error('Token no encontrado.');
-
-    const response = await axios.get('https://rotiserialatriada-dgjb.onrender.com/api/comandas', {
-      headers: { Authorization: `Bearer ${token}` },
+    const response = await axios.get(`https://rotiserialatriada-dgjb.onrender.com/api/pedidos/${id}`, {
+      headers: { Authorization: `Bearer ${token}` }
     });
 
-    // Adaptar para el nuevo formato de respuesta
-    if (response.data && response.data.success && Array.isArray(response.data.data)) {
-      this.comandas = response.data.data;
-    } else {
-      console.error('Formato de respuesta inesperado:', response.data);
-      this.error = 'Error al obtener comandas. Formato de respuesta no válido.';
-    }
-  } catch (err) {
-    console.error('Error al obtener comandas:', err);
-    this.error = 'Error al obtener comandas.';
-  }
-},
-async eliminarComanda(id) {
-  try {
-    if (!id) {
-      console.error('Error: id de comanda no definido');
-      alert('Error: id de comanda no definido');
-      return;
-    }
-
-    const token = localStorage.getItem('token');
-    if (!token) throw new Error('Token no encontrado.');
-
-    const response = await axios.delete(`https://rotiserialatriada-dgjb.onrender.com/api/comandas/${id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    if (response.data && response.data.success) {
-      alert('Comanda eliminada correctamente.');
-      await this.obtenerComandas();
-    } else {
-      console.error('Error al eliminar comanda:', response.data);
-      alert('Error al eliminar la comanda.');
-    }
-  } catch (err) {
-    console.error('Error al eliminar comanda:', err);
-    alert('Error al eliminar la comanda.');
-  }
-},
-async verDetalleComanda(id) {
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) throw new Error('Token no encontrado.');
-
-    const response = await axios.get(
-      `https://rotiserialatriada-dgjb.onrender.com/api/comanda_productos/${id}`,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-
-    // Adaptar para el nuevo formato de respuesta
-    if (response.data && response.data.success && Array.isArray(response.data.data)) {
-      this.detalleProductos = response.data.data.map(producto => ({
-        id: producto.id,
-        id_comanda: producto.id_comanda,
-        id_producto: producto.id_producto,
-        cantidad: producto.cantidad,
-        subtotal: producto.subtotal,
-        producto_nombre: producto.producto_nombre
+    if (response.data.data) {
+      // Asegúrate de que la respuesta contenga los productos
+      this.detalleProductos = response.data.data.productos.map(prod => ({
+        id: prod.id,
+        nombre: prod.nombre,
+        cantidad: prod.cantidad,
+        subtotal: prod.subtotal
       }));
       this.detalleComandaId = id;
       this.detalleComandaVisible = true;
     } else {
-      console.error('Formato de respuesta inesperado:', response.data);
-      alert('Error al obtener el detalle de la comanda.');
+      console.error('No se encontró el detalle de la comanda.');
     }
   } catch (error) {
-    console.error('Error al obtener el detalle de la comanda:', error);
-    alert('Error al obtener el detalle de la comanda.');
+    console.error('Error al obtener detalle de comanda:', error);
   }
 },
     cerrarDetalleComanda() {
       this.detalleComandaVisible = false;
       this.detalleProductos = [];
-      this.detalleComandaId = null;
-    },
+    }
   },
-  mounted() {
-  this.obtenerProductos();
-  this.obtenerComandas();
-  this.obtenerCotizacionDolar(); // Obtener cotización del dólar al montar el componente
-},
+  async mounted() {
+    await this.obtenerProductos();
+    await this.obtenerComandas();
+    await this.obtenerCotizacionDolar();
+  }
 };
 </script>
