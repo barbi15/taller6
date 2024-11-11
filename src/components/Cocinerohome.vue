@@ -106,40 +106,49 @@ export default {
       this.router.push('/login');
     },
     getComandas() {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        this.errorMessage = 'No se encontró el token. Por favor, inicia sesión nuevamente.';
-        return;
+  const token = localStorage.getItem('token');
+  if (!token) {
+    this.errorMessage = 'No se encontró el token. Por favor, inicia sesión nuevamente.';
+    return;
+  }
+
+  axios
+    .get('https://rotiserialatriada-dgjb.onrender.com/api/pedidos', {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    .then((response) => {
+      // Asumiendo que response.data es un objeto con la estructura: { success: true, data: [comandas] }
+      if (response.data.success && Array.isArray(response.data.data)) {
+        this.comandas = response.data.data.filter(comanda => comanda.estado === 'Pendiente');
+      } else {
+        this.errorMessage = 'Formato inesperado de respuesta al obtener las comandas.';
       }
+    })
+    .catch((error) => {
+      this.errorMessage = 'Error al obtener las comandas: ' + error.message;
+      console.error('Error al obtener las comandas:', error);
+    });
+},
+async verDetallesComanda(comandaId) {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('Token no encontrado.');
 
-      axios
-        .get('https://rotiserialatriada-dgjb.onrender.com/api/pedidos', {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        .then((response) => {
-          this.comandas = response.data.filter(comanda => comanda.estado === 'Pendiente');
-        })
-        .catch((error) => {
-          this.errorMessage = 'Error al obtener las comandas: ' + error.message;
-          console.error('Error al obtener las comandas:', error);
-        });
-    },
-    async verDetallesComanda(comandaId) {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) throw new Error('Token no encontrado.');
+    const response = await axios.get(`https://rotiserialatriada-dgjb.onrender.com/api/pedidos/${comandaId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
-        const response = await axios.get(`https://rotiserialatriada-dgjb.onrender.com/api/pedidos/${comandaId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        this.detallesComanda = response.data;
-        this.mostrarDetalles = true;
-      } catch (error) {
-        this.errorMessage = 'Error al obtener detalles de la comanda: ' + error.message;
-        console.error('Error al obtener detalles de la comanda:', error);
-      }
-    },
+    if (response.data.success) {
+      this.detallesComanda = response.data.data;
+      this.mostrarDetalles = true;
+    } else {
+      this.errorMessage = 'Error en la respuesta al obtener detalles de la comanda.';
+    }
+  } catch (error) {
+    this.errorMessage = 'Error al obtener detalles de la comanda: ' + error.message;
+    console.error('Error al obtener detalles de la comanda:', error);
+  }
+},
     cerrarModal() {
       this.mostrarDetalles = false;
       this.detallesComanda = { id: null, productos: [] };
@@ -153,11 +162,10 @@ export default {
 
       try {
         // Realizar la petición PUT para actualizar el estado de la comanda
-        await axios.put(
-          `https://rotiserialatriada-dgjb.onrender.com/api/pedidos/${comandaId}`,
+        await axios.put(`https://rotiserialatriada-dgjb.onrender.com/api/pedidos/${comandaId}`,
           payload,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+          { headers: { Authorization: `Bearer ${token}` } 
+        });
 
         // Mostrar mensaje de éxito al usuario
         alert(`Estado de la comanda actualizado a: ${newState}`);
@@ -166,7 +174,7 @@ export default {
         await this.getComandas();
       } catch (error) {
         this.errorMessage = 'Error al actualizar la comanda: ' + error.message;
-        console.error(`Error al actualizar la comanda ${comandaId}:`, error);
+        console.error(`Error al actualizar la comanda ${comandaId}:, error`);
       }
     },
     formatDate(dateString) {
@@ -174,5 +182,5 @@ export default {
       return new Date(dateString).toLocaleDateString(undefined, options);
     },
   },
-};
+}
 </script>
