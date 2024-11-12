@@ -3,7 +3,7 @@
     <h1>Pantalla del Cocinero</h1>
 
     <div class="logo3-container">
-      <img src='../images/logorotiseria.png' alt="Logo" id="logo">
+      <img src="../images/logorotiseria.png" alt="Logo" id="logo" />
     </div>
     <div class="top-buttons">
       <button @click="irAPerfilCocinero" class="perfil-button">Ver Perfil</button>
@@ -64,9 +64,9 @@
 </template>
 
 <script>
-import '../styles/Cocinero.css';
-import axios from 'axios';
-import { useRouter } from 'vue-router';
+import "../styles/Cocinero.css";
+import axios from "axios";
+import { useRouter } from "vue-router";
 
 export default {
   setup() {
@@ -78,109 +78,107 @@ export default {
       comandas: [],
       detallesComanda: {
         id: null,
-        productos: []
+        productos: [],
       },
       mostrarDetalles: false,
-      errorMessage: '',
-      autoUpdateInterval: null, // Variable para almacenar el intervalo de actualización automática
+      errorMessage: "",
     };
   },
   mounted() {
+    // Llamamos a getComandas solo cuando se carga el componente
     this.getComandas();
-    // Iniciar la actualización automática cada 10 segundos
-    this.autoUpdateInterval = setInterval(this.getComandas, 10000); // 10000 ms = 10 segundos
-  },
-  beforeDestroy() {
-    // Limpiar el intervalo cuando el componente se destruya
-    if (this.autoUpdateInterval) {
-      clearInterval(this.autoUpdateInterval);
-    }
   },
   methods: {
     irAPerfilCocinero() {
-      this.router.push('/CocineroPerfil');
+      this.router.push("/CocineroPerfil");
     },
     cerrarSesion() {
-      localStorage.removeItem('token');
-      localStorage.removeItem('userId');
-      this.router.push('/login');
+      localStorage.removeItem("token");
+      localStorage.removeItem("userId");
+      this.router.push("/login");
     },
     getComandas() {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
   if (!token) {
-    this.errorMessage = 'No se encontró el token. Por favor, inicia sesión nuevamente.';
+    this.errorMessage = "No se encontró el token. Por favor, inicia sesión nuevamente.";
     return;
   }
 
   axios
-    .get('https://rotiserialatriada-dgjb.onrender.com/api/pedidos', {
+    .get("https://rotiserialatriada-dgjb.onrender.com/api/pedidos", {
       headers: { Authorization: `Bearer ${token}` },
     })
     .then((response) => {
-      // Asumiendo que response.data es un objeto con la estructura: { success: true, data: [comandas] }
       if (response.data.success && Array.isArray(response.data.data)) {
-        this.comandas = response.data.data.filter(comanda => comanda.estado === 'Pendiente');
+        // Filtrar para mostrar solo comandas en estado "Pendiente" o "Procesandose"
+        this.comandas = response.data.data.filter(
+          (comanda) => comanda.estado === "Pendiente" || comanda.estado === "Procesandose"
+        );
       } else {
-        this.errorMessage = 'Formato inesperado de respuesta al obtener las comandas.';
+        this.errorMessage = "Formato inesperado de respuesta al obtener las comandas.";
       }
     })
     .catch((error) => {
-      this.errorMessage = 'Error al obtener las comandas: ' + error.message;
-      console.error('Error al obtener las comandas:', error);
+      this.errorMessage = "Error al obtener las comandas: " + error.message;
+      console.error("Error al obtener las comandas:", error);
     });
 },
-async verDetallesComanda(comandaId) {
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) throw new Error('Token no encontrado.');
+    async verDetallesComanda(comandaId) {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) throw new Error("Token no encontrado.");
 
-    const response = await axios.get(`https://rotiserialatriada-dgjb.onrender.com/api/pedidos/${comandaId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+        const response = await axios.get(
+          `https://rotiserialatriada-dgjb.onrender.com/api/pedidos/${comandaId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
 
-    if (response.data.success) {
-      this.detallesComanda = response.data.data;
-      this.mostrarDetalles = true;
-    } else {
-      this.errorMessage = 'Error en la respuesta al obtener detalles de la comanda.';
-    }
-  } catch (error) {
-    this.errorMessage = 'Error al obtener detalles de la comanda: ' + error.message;
-    console.error('Error al obtener detalles de la comanda:', error);
-  }
-},
+        if (response.data.success) {
+          this.detallesComanda = response.data.data;
+          this.mostrarDetalles = true;
+        } else {
+          this.errorMessage = "Error en la respuesta al obtener detalles de la comanda.";
+        }
+      } catch (error) {
+        this.errorMessage = "Error al obtener detalles de la comanda: " + error.message;
+        console.error("Error al obtener detalles de la comanda:", error);
+      }
+    },
     cerrarModal() {
       this.mostrarDetalles = false;
       this.detallesComanda = { id: null, productos: [] };
     },
     async updateComanda(comandaId, newState) {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const payload = {
         pedido_id: comandaId,
-        estado: newState
+        estado: newState,
       };
 
       try {
-        // Realizar la petición PUT para actualizar el estado de la comanda
-        await axios.put(`https://rotiserialatriada-dgjb.onrender.com/api/pedidos/${comandaId}`,
+        await axios.put(
+          `https://rotiserialatriada-dgjb.onrender.com/api/pedidos/${comandaId}`,
           payload,
-          { headers: { Authorization: `Bearer ${token}` } 
-        });
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
 
-        // Mostrar mensaje de éxito al usuario
         alert(`Estado de la comanda actualizado a: ${newState}`);
 
-        // Llamar a getComandas() para recargar la lista completa de comandas
+        // Llamamos a getComandas() para recargar la lista completa de comandas
         await this.getComandas();
       } catch (error) {
-        this.errorMessage = 'Error al actualizar la comanda: ' + error.message;
+        this.errorMessage = "Error al actualizar la comanda: " + error.message;
         console.error(`Error al actualizar la comanda ${comandaId}:, error`);
       }
     },
     formatDate(dateString) {
-      const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+      const options = { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" };
       return new Date(dateString).toLocaleDateString(undefined, options);
     },
   },
-}
+};
 </script>
