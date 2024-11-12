@@ -38,7 +38,11 @@
               </select>
             </td>
             <td>
-              <button @click="verDetallesComanda(comanda.id)">Ver Detalles</button>
+              <ul>
+                <li v-for="producto in comanda.productos" :key="producto.id">
+                  Producto: {{ producto.nombre }} - Cantidad: {{ producto.cantidad }}
+                </li>
+              </ul>
             </td>
             <td>
               <button @click="updateComanda(comanda.id, comanda.estado)">Actualizar</button>
@@ -46,17 +50,6 @@
           </tr>
         </tbody>
       </table>
-    </div>
-
-    <!-- Modal para mostrar los detalles de la comanda -->
-    <div v-if="mostrarDetalles" class="modal-detalles">
-      <h3>Detalles de la Comanda {{ detallesComanda.id }}</h3>
-      <ul>
-        <li v-for="producto in detallesComanda.productos" :key="producto.id">
-          ID Producto: {{ producto.id }} - Cantidad: {{ producto.cantidad }} - Subtotal: ${{ producto.subtotal }}
-        </li>
-      </ul>
-      <button @click="cerrarModal">Cerrar</button>
     </div>
 
     <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
@@ -76,16 +69,10 @@ export default {
   data() {
     return {
       comandas: [],
-      detallesComanda: {
-        id: null,
-        productos: [],
-      },
-      mostrarDetalles: false,
       errorMessage: "",
     };
   },
   mounted() {
-    // Llamamos a getComandas solo cuando se carga el componente
     this.getComandas();
   },
   methods: {
@@ -97,58 +84,49 @@ export default {
       localStorage.removeItem("userId");
       this.router.push("/login");
     },
-    getComandas() {
-  const token = localStorage.getItem("token");
-  if (!token) {
-    this.errorMessage = "No se encontró el token. Por favor, inicia sesión nuevamente.";
-    return;
-  }
-
-  axios
-    .get("https://rotiserialatriada-dgjb.onrender.com/api/pedidos", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-    .then((response) => {
-      if (response.data.success && Array.isArray(response.data.data)) {
-        // Filtrar para mostrar solo comandas en estado "Pendiente" o "Procesandose"
-        this.comandas = response.data.data.filter(
-          (comanda) => comanda.estado === "Pendiente" || comanda.estado === "Procesandose"
-        );
-      } else {
-        this.errorMessage = "Formato inesperado de respuesta al obtener las comandas.";
+    async getComandas() {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        this.errorMessage = "No se encontró el token. Por favor, inicia sesión nuevamente.";
+        return;
       }
-    })
-    .catch((error) => {
-      this.errorMessage = "Error al obtener las comandas: " + error.message;
-      console.error("Error al obtener las comandas:", error);
-    });
-},
-    async verDetallesComanda(comandaId) {
+
       try {
-        const token = localStorage.getItem("token");
-        if (!token) throw new Error("Token no encontrado.");
+        const response = await axios.get("https://rotiserialatriada-dgjb.onrender.com/api/pedidos", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-        const response = await axios.get(
-          `https://rotiserialatriada-dgjb.onrender.com/api/pedidos/${comandaId}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+        if (response.data.success && Array.isArray(response.data.data)) {
+          this.comandas = response.data.data.filter(
+            (comanda) => comanda.estado === "Pendiente" || comanda.estado === "Procesandose"
+          );
 
-        if (response.data.success) {
-          this.detallesComanda = response.data.data;
-          this.mostrarDetalles = true;
+          await this.cargarDetallesProductos();
         } else {
-          this.errorMessage = "Error en la respuesta al obtener detalles de la comanda.";
+          this.errorMessage = "Formato inesperado de respuesta al obtener las comandas.";
         }
       } catch (error) {
-        this.errorMessage = "Error al obtener detalles de la comanda: " + error.message;
-        console.error("Error al obtener detalles de la comanda:", error);
+        this.errorMessage = "Error al obtener las comandas: " + error.message;
+        console.error("Error al obtener las comandas:", error);
       }
     },
-    cerrarModal() {
-      this.mostrarDetalles = false;
-      this.detallesComanda = { id: null, productos: [] };
+    async cargarDetallesProductos() {
+      try {
+        const response = await axios.get("https://rotiserialatriada-dgjb.onrender.com/api/productos");
+        const productosData = response.data.data;
+
+        this.comandas.forEach((comanda) => {
+          comanda.productos = comanda.productos.map((producto) => {
+            const detalleProducto = productosData.find((p) => p.id === producto.id);
+            return detalleProducto
+              ? { ...producto, nombre: detalleProducto.nombre, precio: detalleProducto.precio }
+              : producto;
+          });
+        });
+      } catch (error) {
+        this.errorMessage = "Error al cargar detalles de productos: " + error.message;
+        console.error("Error al cargar detalles de productos:", error);
+      }
     },
     async updateComanda(comandaId, newState) {
       const token = localStorage.getItem("token");
@@ -158,21 +136,15 @@ export default {
       };
 
       try {
-        await axios.put(
-          `https://rotiserialatriada-dgjb.onrender.com/api/pedidos/${comandaId}`,
-          payload,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+        await axios.put(`https://rotiserialatriada-dgjb.onrender.com/api/pedidos/${comandaId}`, payload, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
         alert(`Estado de la comanda actualizado a: ${newState}`);
-
-        // Llamamos a getComandas() para recargar la lista completa de comandas
         await this.getComandas();
       } catch (error) {
         this.errorMessage = "Error al actualizar la comanda: " + error.message;
-        console.error(`Error al actualizar la comanda ${comandaId}:, error`);
+        console.error(`Error al actualizar la comanda ${comandaId}:`, error);
       }
     },
     formatDate(dateString) {

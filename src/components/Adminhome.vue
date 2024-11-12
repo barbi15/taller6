@@ -110,14 +110,14 @@
 
     <!-- Modal para mostrar el detalle de la comanda -->
     <div v-if="detalleComandaVisible" class="detalle-comanda-modal">
-      <h3>Detalle de Comanda #{{ detalleComandaId }}</h3>
-      <ul>
-        <li v-for="producto in detalleProductos" :key="producto.id">
-          {{ producto.producto_nombre }} - Cantidad: {{ producto.cantidad }} - Subtotal: ${{ producto.subtotal }}
-        </li>
-      </ul>
-      <button @click="cerrarDetalleComanda" class="button-close">Cerrar</button>
-    </div>
+  <h3>Detalle de Comanda #{{ detalleComandaId }}</h3>
+  <ul>
+    <li v-for="producto in detalleProductos" :key="producto.id">
+      <strong>{{ producto.nombre }}</strong> - Cantidad: {{ producto.cantidad }} - Precio: ${{ producto.precio }} - Subtotal: ${{ producto.subtotal }}
+    </li>
+  </ul>
+  <button @click="cerrarDetalleComanda" class="button-close">Cerrar</button>
+</div>
   </div>
 </template>
 
@@ -316,6 +316,10 @@ export default {
       }
     },
     async verDetalleComanda(id) {
+  if (this.detalleComandaVisible && this.detalleComandaId === id) {
+    // Si ya está mostrando el detalle de esta comanda, no hacer nada
+    return;
+  }
   try {
     const token = localStorage.getItem('token');
     const response = await axios.get(`https://rotiserialatriada-dgjb.onrender.com/api/pedidos/${id}`, {
@@ -323,13 +327,20 @@ export default {
     });
 
     if (response.data.data) {
-      // Asegúrate de que la respuesta contenga los productos
-      this.detalleProductos = response.data.data.productos.map(prod => ({
-        id: prod.id,
-        nombre: prod.nombre,
-        cantidad: prod.cantidad,
-        subtotal: prod.subtotal
-      }));
+      // Procesar productos de la comanda
+      this.detalleProductos = await Promise.all(
+        response.data.data.productos.map(async prod => {
+          const productoCompleto = await this.obtenerProductoPorId(prod.id);
+          return {
+            id: prod.id,
+            nombre: productoCompleto.nombre,
+            cantidad: prod.cantidad,
+            precio: productoCompleto.precio,
+            subtotal: (productoCompleto.precio * prod.cantidad).toFixed(2)
+          };
+        })
+      );
+
       this.detalleComandaId = id;
       this.detalleComandaVisible = true;
     } else {
@@ -339,15 +350,28 @@ export default {
     console.error('Error al obtener detalle de comanda:', error);
   }
 },
-    cerrarDetalleComanda() {
-      this.detalleComandaVisible = false;
-      this.detalleProductos = [];
+  async obtenerProductoPorId(idProducto) {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`https://rotiserialatriada-dgjb.onrender.com/api/productos/${idProducto}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      return response.data.data; // Retorna el producto completo con los detalles necesarios
+    } catch (error) {
+      console.error(`Error al obtener detalles del producto con ID ${idProducto}:`, error);
+      return {}; // Retorna un objeto vacío si hay un error
     }
-  },
+  }
+},
+cerrarDetalleComanda() {
+  this.detalleComandaVisible = false;
+  this.detalleProductos = [];
+  this.detalleComandaId = null; // Restablecer el ID para evitar referencias
+},
   async mounted() {
     await this.obtenerProductos();
     await this.obtenerComandas();
     await this.obtenerCotizacionDolar();
   }
-};
+}
 </script>
