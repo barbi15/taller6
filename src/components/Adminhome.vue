@@ -1,16 +1,15 @@
 <template>
- 
-  <div class="admin-background">  <!-- Aquí aplicamos la clase -->
+  <div class="admin-background"> <!-- Aquí aplicamos la clase -->
     <div class="logo4-container">
       <img src='../images/logorotiseria.png' alt="Logo" id="logo">
     </div>
     <h2>Pantalla Administrador/a</h2>
 
- <!-- Mostrar la cotización del dólar -->
- <p class="dollar-rate">Cotización del Dólar: ${{ tasaDolar }}</p>
+    <!-- Mostrar la cotización del dólar -->
+    <p class="dollar-rate">Cotización del Dólar: ${{ tasaDolar }}</p>
+
     <!-- Contenedor principal de botones alineados -->
     <div class="buttons-container">
-      <!-- Botones de cerrar sesión y Verificación de Stock -->
       <div class="button-group">
         <button @click="verificarStock" class="button-stock">Verificar Stock</button>
         <button @click="irAUsuarios" class="button-gestion">Gestionar Usuarios</button>
@@ -31,15 +30,12 @@
               {{ producto.nombre }} - Precio: ${{ producto.precio }} - Stock: {{ producto.stock }}
               <div>
                 <button class="button-adjust-stock" @click="reducirCantidad(producto)" :disabled="producto.stock === 0">-</button>
-                
-                <!-- Campo de entrada para la cantidad, editable manualmente -->
                 <input type="number" v-model.number="producto.cantidad" @input="actualizarCantidadManual(producto)" min="0" :max="producto.stock" style="width: 40px; text-align: center;" :disabled="producto.stock === 0" />
-
                 <button class="button-adjust-stock" @click="aumentarCantidad(producto)" :disabled="producto.stock === 0">+</button>
               </div>
             </li>
           </ul>
-       </div>
+        </div>
       </div>
 
       <!-- Columna derecha: Comanda actual -->
@@ -91,7 +87,12 @@
             <td>${{ comanda.precio_total }}</td>
             <td>{{ comanda.estado }}</td>
             <td>
-              <button @click="verDetalleComanda(comanda.id)" class="button-detail">Ver Detalle</button>
+              <!-- Muestra el detalle automáticamente sin el botón -->
+              <ul>
+                <li v-for="producto in comanda.detalleProductos" :key="producto.id">
+                  <strong>{{ producto.nombre }}</strong> - Cantidad: {{ producto.cantidad }} - Precio: ${{ producto.precio }} - Subtotal: ${{ producto.subtotal }}
+                </li>
+              </ul>
             </td>
             <td>
               <button @click="eliminarComanda(comanda.id)" v-if="comanda.id" class="button-delete">Eliminar</button>
@@ -100,24 +101,6 @@
         </tbody>
       </table>
     </div>
-
-    <!-- Modal para advertencia de stock agotado -->
-    <div v-if="mostrarMensajeStock" class="detalle-comanda-modal">
-      <h3>Stock agotado</h3>
-      <p>El stock de este producto se ha agotado. Por favor, renueva el stock para continuar.</p>
-      <button @click="cerrarMensajeStock" class="button-close">OK</button>
-    </div>
-
-    <!-- Modal para mostrar el detalle de la comanda -->
-    <div v-if="detalleComandaVisible" class="detalle-comanda-modal">
-  <h3>Detalle de Comanda #{{ detalleComandaId }}</h3>
-  <ul>
-    <li v-for="producto in detalleProductos" :key="producto.id">
-      <strong>{{ producto.nombre }}</strong> - Cantidad: {{ producto.cantidad }} - Precio: ${{ producto.precio }} - Subtotal: ${{ producto.subtotal }}
-    </li>
-  </ul>
-  <button @click="cerrarDetalleComanda" class="button-close">Cerrar</button>
-</div>
   </div>
 </template>
 
@@ -172,15 +155,12 @@ export default {
         const response = await axios.get('https://rotiserialatriada-dgjb.onrender.com/api/productos', {
           headers: { Authorization: `Bearer ${token}` },
         });
-
-        if (response.data.success) {
-          this.productos = response.data.data.map(producto => ({
-            ...producto,
-            cantidad: 0
-          }));
-        } else {
-          console.error('Formato de respuesta inesperado:', response.data);
-        }
+        
+        // Se asume que el formato ya es un array de productos como se mostró
+        this.productos = response.data.map(producto => ({
+          ...producto,
+          cantidad: 0
+        }));
       } catch (err) {
         console.error('Error al obtener productos:', err);
       }
@@ -267,11 +247,12 @@ export default {
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
-        if (response.data.success) {
+        if (response.data) {
           this.comandas.push({
-            id: response.data.data.id,
-            precio_total: response.data.data.precio_total,
-            estado: response.data.data.estado
+            id: response.data.id,
+            precio_total: response.data.precio_total,
+            estado: response.data.estado,
+            productos: response.data.productos
           });
           this.comandaProductos = [];
           alert("Comanda confirmada exitosamente.");
@@ -285,16 +266,33 @@ export default {
       }
     },
     async obtenerComandas() {
-      try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get('https://rotiserialatriada-dgjb.onrender.com/api/pedidos', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        this.comandas = response.data.data;
-      } catch (err) {
-        console.error('Error al obtener comandas:', err);
-      }
-    },
+  try {
+    const token = localStorage.getItem('token');
+    const response = await axios.get('https://rotiserialatriada-dgjb.onrender.com/api/pedidos', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    
+    // Cargar productos de la API una vez para reducir las consultas
+    await this.obtenerProductos();
+    
+    // Agregar detalles a cada producto de la comanda
+    this.comandas = response.data.map(comanda => ({
+      ...comanda,
+      detalleProductos: comanda.productos.map(p => {
+        const producto = this.productos.find(prod => prod.id === p.id);
+        return {
+          id: p.id,
+          nombre: producto ? producto.nombre : 'Producto desconocido',
+          cantidad: p.cantidad,
+          precio: producto ? producto.precio : 0,
+          subtotal: producto ? p.cantidad * producto.precio : 0
+        };
+      })
+    }));
+  } catch (err) {
+    console.error('Error al obtener comandas:', err);
+  }
+},
     eliminarProductoDeComanda(index) {
   const producto = this.comandaProductos[index];
   const productoOriginal = this.productos.find(p => p.id === producto.id_producto);
@@ -316,40 +314,29 @@ export default {
       }
     },
     async verDetalleComanda(id) {
-  if (this.detalleComandaVisible && this.detalleComandaId === id) {
-    // Si ya está mostrando el detalle de esta comanda, no hacer nada
-    return;
-  }
-  try {
-    const token = localStorage.getItem('token');
-    const response = await axios.get(`https://rotiserialatriada-dgjb.onrender.com/api/pedidos/${id}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get(`https://rotiserialatriada-dgjb.onrender.com/api/pedidos/${id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
 
-    if (response.data.data) {
-      // Procesar productos de la comanda
-      this.detalleProductos = await Promise.all(
-        response.data.data.productos.map(async prod => {
-          const productoCompleto = await this.obtenerProductoPorId(prod.id);
-          return {
+        if (response.data) {
+          // Procesamos los productos con los subtotales
+          this.detalleProductos = response.data.productos.map(prod => ({
             id: prod.id,
-            nombre: productoCompleto.nombre,
             cantidad: prod.cantidad,
-            precio: productoCompleto.precio,
-            subtotal: (productoCompleto.precio * prod.cantidad).toFixed(2)
-          };
-        })
-      );
-
-      this.detalleComandaId = id;
-      this.detalleComandaVisible = true;
-    } else {
-      console.error('No se encontró el detalle de la comanda.');
+            subtotal: prod.subtotal
+          }));
+          this.detalleComandaId = id;
+          this.detalleComandaVisible = true;
+        } else {
+          console.error('No se encontró el detalle de la comanda.');
+        }
+      } catch (error) {
+        console.error('Error al obtener detalle de comanda:', error);
+      }
     }
-  } catch (error) {
-    console.error('Error al obtener detalle de comanda:', error);
-  }
-},
+  },
   async obtenerProductoPorId(idProducto) {
     try {
       const token = localStorage.getItem('token');
@@ -361,8 +348,7 @@ export default {
       console.error(`Error al obtener detalles del producto con ID ${idProducto}:`, error);
       return {}; // Retorna un objeto vacío si hay un error
     }
-  }
-},
+  },
 cerrarDetalleComanda() {
   this.detalleComandaVisible = false;
   this.detalleProductos = [];
@@ -374,4 +360,4 @@ cerrarDetalleComanda() {
     await this.obtenerCotizacionDolar();
   }
 }
-</script>
+</script> 
