@@ -182,40 +182,45 @@ export default {
       }
     },
     agregarProducto() {
-      if (
-        !this.newProductName ||
-        isNaN(this.newProductPrice) || this.newProductPrice <= 0 ||
-        isNaN(this.newProductStock) || this.newProductStock <= 0
-      ) {
-        alert('Por favor, complete todos los campos con valores numéricos válidos.');
-        return;
+  if (
+    !this.newProductName ||
+    isNaN(this.newProductPrice) || this.newProductPrice <= 0 ||
+    isNaN(this.newProductStock) || this.newProductStock <= 0
+  ) {
+    alert('Por favor, complete todos los campos con valores numéricos válidos.');
+    return;
+  }
+
+  const nuevoProducto = {
+    nombre: this.newProductName,
+    precio: parseFloat(this.newProductPrice.toFixed(2)),
+    stock: this.newProductStock,
+  };
+
+  const token = localStorage.getItem('token');
+  axios
+    .post('https://rotiserialatriada-dgjb.onrender.com/api/productos', nuevoProducto, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    .then((response) => {
+      if (response.status === 201) {
+        this.getProducts(); // Actualiza la lista de productos
+        alert('Producto agregado exitosamente.');
+
+        // Limpiar los campos después de agregar el producto
+        this.newProductName = '';
+        this.newProductPrice = 0;
+        this.newProductStock = 0;
+      } else {
+        console.error('Error al agregar producto:', response.data);
+        alert('Error al agregar producto.');
       }
-
-      const nuevoProducto = {
-        nombre: this.newProductName,
-        precio: parseFloat(this.newProductPrice.toFixed(2)),
-        stock: this.newProductStock,
-      };
-
-      const token = localStorage.getItem('token');
-      axios
-        .post('https://rotiserialatriada-dgjb.onrender.com/api/productos', nuevoProducto, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        .then((response) => {
-          if (response.status === 201) {
-            this.getProducts(); // Actualiza la lista de productos
-            alert('Producto agregado exitosamente.');
-          } else {
-            console.error('Error al agregar producto:', response.data);
-            alert('Error al agregar producto.');
-          }
-        })
-        .catch((error) => {
-          console.error('Error al agregar el producto:', error);
-          alert('Error al agregar producto.');
-        });
-    },
+    })
+    .catch((error) => {
+      console.error('Error al agregar el producto:', error);
+      alert('Error al agregar producto.');
+    });
+},
     eliminarProducto(productId) {
       const token = localStorage.getItem('token');
       axios
