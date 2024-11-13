@@ -6,7 +6,7 @@
       <img src="../images/logorotiseria.png" alt="Logo" id="logo" />
     </div>
     <div class="top-buttons">
-      <button @click="irAPerfilCocinero" class="perfil-button">Ver Perfil</button>
+      <button @click="irAPerfilCocinero" class="perfil-button hidden">Ver Perfil</button>
       <button @click="cerrarSesion" class="cerrarsesion-button">Cerrar Sesión</button>
     </div>
 
