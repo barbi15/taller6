@@ -83,6 +83,7 @@ table {
   width: auto;
   border-collapse: collapse;
   margin-bottom: 10px;
+  height: auto;
 }
 
 th,
@@ -91,7 +92,7 @@ td {
   padding: 8px;
   background-color: white;
   text-align: center;
-  width: 150px;
+  width: auto;
 }
 
 .button-adjust-stock {
@@ -128,7 +129,7 @@ td {
   padding: 15px;
   border-radius: 8px;
   max-height: 300px;
-  width: 900px;
+  width: auto;
   overflow-y: auto;
 }
 
