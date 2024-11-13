@@ -85,35 +85,36 @@ export default {
       this.router.push("/login");
     },
     async getComandas() {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        this.errorMessage = "No se encontró el token. Por favor, inicia sesión nuevamente.";
-        return;
-      }
+  const token = localStorage.getItem("token");
+  if (!token) {
+    this.errorMessage = "No se encontró el token. Por favor, inicia sesión nuevamente.";
+    return;
+  }
 
-      try {
-        const response = await axios.get("https://rotiserialatriada-dgjb.onrender.com/api/pedidos", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+  try {
+    const response = await axios.get("https://rotiserialatriada-dgjb.onrender.com/api/pedidos", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
-        if (response.data.success && Array.isArray(response.data.data)) {
-          this.comandas = response.data.data.filter(
-            (comanda) => comanda.estado === "Pendiente" || comanda.estado === "Procesandose"
-          );
+    // Asignamos la data de la respuesta directamente a las comandas si es un array
+    if (Array.isArray(response.data)) {
+      this.comandas = response.data.filter(
+        (comanda) => comanda.estado === "Pendiente" || comanda.estado === "Procesandose"
+      );
 
-          await this.cargarDetallesProductos();
-        } else {
-          this.errorMessage = "Formato inesperado de respuesta al obtener las comandas.";
-        }
-      } catch (error) {
-        this.errorMessage = "Error al obtener las comandas: " + error.message;
-        console.error("Error al obtener las comandas:", error);
-      }
-    },
+      await this.cargarDetallesProductos();
+    } else {
+      this.errorMessage = "Formato inesperado de respuesta al obtener las comandas.";
+    }
+  } catch (error) {
+    this.errorMessage = "Error al obtener las comandas: " + error.message;
+    console.error("Error al obtener las comandas:", error);
+  }
+},
     async cargarDetallesProductos() {
       try {
         const response = await axios.get("https://rotiserialatriada-dgjb.onrender.com/api/productos");
-        const productosData = response.data.data;
+        const productosData = response.data;
 
         this.comandas.forEach((comanda) => {
           comanda.productos = comanda.productos.map((producto) => {
@@ -130,13 +131,10 @@ export default {
     },
     async updateComanda(comandaId, newState) {
       const token = localStorage.getItem("token");
-      const payload = {
-        pedido_id: comandaId,
-        estado: newState,
-      };
+      const payload = { estado: newState };
 
       try {
-        await axios.put(`https://rotiserialatriada-dgjb.onrender.com/api/pedidos/${comandaId}`, payload, {
+        await axios.patch(`https://rotiserialatriada-dgjb.onrender.com/api/pedidos/${comandaId}`, payload, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
