@@ -119,10 +119,10 @@ export default {
         if (response.data && response.data.success) {
           this.comandas = response.data.data;
         } else {
-          console.error('Error al obtener las comandas:', response.data);
+          console.error('Error al obtener los pedidos:', response.data);
         }
       } catch (error) {
-        console.error('Error al obtener las comandas:', error);
+        console.error('Error al obtener los pedidos:', error);
       }
     },
 
@@ -164,15 +164,15 @@ export default {
         );
 
         if (response.data && response.data.success) {
-          alert('Comanda creada exitosamente.');
+          alert('Pedido creado exitosamente.');
           this.getComandas();
           this.comandaProductos = [];
         } else {
-          alert('Error al crear la comanda.');
+          alert('Error al crear el pedido.');
         }
       } catch (error) {
-        console.error('Error al crear comanda:', error);
-        alert('Error al confirmar la comanda.');
+        console.error('Error al crear el pedido:', error);
+        alert('Error al confirmar el pedido.');
       }
     },
 
@@ -190,14 +190,14 @@ export default {
         });
 
         if (response.data && response.data.success) {
-          alert('Comanda eliminada exitosamente.');
+          alert('Pedido eliminado exitosamente.');
           this.getComandas();
         } else {
-          alert('Error al eliminar la comanda.');
+          alert('Error al eliminar el pedido.');
         }
       } catch (error) {
-        console.error('Error al eliminar comanda:', error);
-        alert('Error al eliminar la comanda.');
+        console.error('Error al eliminar el pedido:', error);
+        alert('Error al eliminar el pedido.');
       }
     },
 

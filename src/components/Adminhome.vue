@@ -40,7 +40,7 @@
 
       <!-- Columna derecha: Comanda actual -->
       <div class="rightcomanda-column">
-        <h3>Comanda actual</h3>
+        <h3>Pedido actual</h3>
         <table>
           <thead>
             <tr>
@@ -70,11 +70,11 @@
 
     <!-- Tabla: Lista de Comandas debajo de ambas columnas -->
     <div class="comandas-container">
-      <h3>Lista de Comandas</h3>
+      <h3>Lista de Pedidos</h3>
       <table>
         <thead>
           <tr>
-            <th>Comanda</th>
+            <th>Pedido</th>
             <th>Precio Total</th>
             <th>Estado</th>
             <th>Detalle</th>
@@ -255,14 +255,14 @@ export default {
             productos: response.data.productos
           });
           this.comandaProductos = [];
-          alert("Comanda confirmada exitosamente.");
+          alert("Pedido confirmado exitosamente.");
           await this.obtenerProductos();
           await this.obtenerComandas();
         } else {
-          alert('Error al confirmar la comanda.');
+          alert('Error al confirmar el pedido.');
         }
       } catch (error) {
-        console.error('Error al confirmar la comanda:', error);
+        console.error('Error al confirmar el pedido:', error);
       }
     },
     async obtenerComandas() {
@@ -290,7 +290,7 @@ export default {
       })
     }));
   } catch (err) {
-    console.error('Error al obtener comandas:', err);
+    console.error('Error al obtener pedidos:', err);
   }
 },
     eliminarProductoDeComanda(index) {
@@ -310,7 +310,7 @@ export default {
         this.comandas = this.comandas.filter(comanda => comanda.id !== id);
         alert('Comanda eliminada correctamente.');
       } catch (err) {
-        console.error('Error al eliminar comanda:', err);
+        console.error('Error al eliminar el pedido:', err);
       }
     },
     async verDetalleComanda(id) {
@@ -330,10 +330,10 @@ export default {
           this.detalleComandaId = id;
           this.detalleComandaVisible = true;
         } else {
-          console.error('No se encontró el detalle de la comanda.');
+          console.error('No se encontró el detalle del pedido.');
         }
       } catch (error) {
-        console.error('Error al obtener detalle de comanda:', error);
+        console.error('Error al obtener detalle del pedido:', error);
       }
     }
   },

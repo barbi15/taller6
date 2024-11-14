@@ -6,12 +6,12 @@
       <img src="../images/logorotiseria.png" alt="Logo" id="logo" />
     </div>
     <div class="top-buttons">
-      <button @click="irAPerfilCocinero" class="perfil-button hidden">Ver Perfil</button>
+      <button @click="irAPerfilCocinero" class="perfil-button">Ver Perfil</button>
       <button @click="cerrarSesion" class="cerrarsesion-button">Cerrar Sesión</button>
     </div>
 
     <div class="title-comanda">
-      <h2>Lista de Comandas</h2>
+      <h2>Lista de Pedidos</h2>
     </div>
     <div class="tabla-container">
       <table class="comandas-table">
@@ -107,8 +107,8 @@ export default {
       this.errorMessage = "Formato inesperado de respuesta al obtener las comandas.";
     }
   } catch (error) {
-    this.errorMessage = "Error al obtener las comandas: " + error.message;
-    console.error("Error al obtener las comandas:", error);
+    this.errorMessage = "Error al obtener los  pedidos: " + error.message;
+    console.error("Error al obtener los pedidos:", error);
   }
 },
     async cargarDetallesProductos() {
@@ -141,8 +141,8 @@ export default {
         alert(`Estado de la comanda actualizado a: ${newState}`);
         await this.getComandas();
       } catch (error) {
-        this.errorMessage = "Error al actualizar la comanda: " + error.message;
-        console.error(`Error al actualizar la comanda ${comandaId}:`, error);
+        this.errorMessage = "Error al actualizar el pedido: " + error.message;
+        console.error(`Error al actualizar el pedido${comandaId}:`, error);
       }
     },
     formatDate(dateString) {

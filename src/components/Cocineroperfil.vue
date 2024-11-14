@@ -1,32 +1,43 @@
 <template>
   <div class="fondo-cont">
-  <div class="cook-profile">
-    <h2>Perfil del Cocinero</h2>
+    <div class="cook-profile">
+      <h2>Perfil del Cocinero</h2>
 
-    <!-- Campo de Usuario (solo lectura) -->
-    <div class="form1-group">
-      <label>Usuario</label>
-      <p>{{ cookData.nombre_usuario }}</p>
-    </div>
+      <!-- Campo de Usuario (solo lectura) -->
+      <div class="form1-group">
+        <label>Usuario</label>
+        <p>{{ cookData.nombre_usuario }}</p>
+      </div>
 
-    <!-- Correo Electrónico (solo lectura) -->
-    <div class="form2-group">
-      <label>Correo Electrónico</label>
-      <p>{{ cookData.correo }}</p>
-    </div>
+      <!-- Campo de Correo Electrónico (editable) -->
+      <div class="form2-group">
+        <label for="correo">Correo Electrónico</label>
+        <input
+          v-model="cookData.correo"
+          id="correo"
+          type="email"
+          placeholder="Actualizar correo electrónico"
+        />
+      </div>
 
-    <!-- Contraseña (solo lectura) -->
-    <div class="form3-group">
-      <label>Contraseña</label>
-      <p>********</p> <!-- Mostramos los asteriscos para que no se vea la contraseña real -->
-    </div>
+      <!-- Campo de Contraseña (editable) -->
+      <div class="form3-group">
+        <label for="contrasena">Contraseña</label>
+        <input
+          v-model="cookData.contrasena"
+          id="contrasena"
+          type="password"
+          placeholder="Actualizar contraseña"
+        />
+      </div>
 
-    <div class="form4-group">
-      <!-- Botón para volver a la pantalla Cocinero Home -->
-      <button @click="volverAHome">Volver a Home</button>
+      <!-- Botón para guardar los cambios -->
+      <div class="form4-group">
+        <button @click="actualizarPerfil">Guardar Cambios</button>
+        <button @click="volverAHome">Volver a Home</button>
+      </div>
     </div>
   </div>
-</div>
 </template>
 
 <script>
@@ -64,9 +75,48 @@ export default {
         alert('No se pudieron cargar los datos del cocinero.');
       }
     },
+    // Método para actualizar el perfil (correo y contraseña)
+    async actualizarPerfil() {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          alert('Token no encontrado. Por favor, inicie sesión nuevamente.');
+          return;
+        }
+
+        const payload = {
+          correo: this.cookData.correo,
+          contrasena: this.cookData.contrasena
+        };
+
+        const response = await axios.patch(
+          'https://taller6-alejo.onrender.com/me',
+          payload,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        );
+
+        if (response.status === 200) {
+          this.cookData = response.data; // Actualiza cookData con los datos devueltos
+          alert('Perfil actualizado exitosamente.');
+        }
+      } catch (error) {
+        console.error('Error al actualizar el perfil:', error);
+        if (error.response && error.response.status === 401) {
+          alert('No autorizado. Por favor, inicie sesión nuevamente.');
+        } else if (error.code === 'ERR_NETWORK') {
+          alert('Error de red. Verifica tu conexión o intenta nuevamente más tarde.');
+        } else {
+          alert('Error al actualizar el perfil.');
+        }
+      }
+    },
     // Método para volver a la pantalla Cocinero Home
     volverAHome() {
-      this.$router.push({ name: 'Cocinerohome' }); 
+      this.$router.push({ name: 'Cocinerohome' });
     }
   }
 };
